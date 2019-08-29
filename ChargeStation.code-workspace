@@ -1,0 +1,26 @@
+{
+	"folders": [
+		{
+			"path": "/Users/sri/Documents/SriLab/IoT/PlatformIO/Projects/ESP8266-PlotSensor-RTC"
+		},
+		{
+			"name": "ESP8266-ChargeStation",
+			"path": "."
+		},
+		{
+			"path": "/Users/sri/Documents/SriLab/IoT/PlatformIO/Projects/ESP8266-DHT11-DHT22"
+		},
+		{
+			"path": "/Users/sri/Downloads/esp8266-react-master"
+		},
+		{
+			"path": "/Users/sri/Documents/SriLab/IoT/PlatformIO/Projects/Maalee.orig"
+		}
+	],
+	"settings": {
+		"terminal.integrated.env.osx": {
+			"PATH": "/Users/sri/.platformio/penv/bin:/Users/sri/.platformio/penv:/anaconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin",
+			"PLATFORMIO_CALLER": "vscode"
+		}
+	}
+}
