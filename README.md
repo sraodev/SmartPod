@@ -1,4 +1,4 @@
-# Smart Pod
+# Smart ![Icon](/media/smartpod.png?raw=true "Icon") od
 
 Smart Pod addresses the entire process of charging electric vehicles (EV).
 
@@ -37,3 +37,4 @@ You will need the following before you can get started.
 * [NtpClient](https://github.com/gmag11/NtpClient)
 * [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
 * [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)
+
