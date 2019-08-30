@@ -1,4 +1,4 @@
-# Smart ![Icon](/media/smartpod.png?raw=true "Icon") Pod
+# Smart P![Icon](/media/smartpod.png?raw=true "Icon") d
 
 Smart Pod addresses the entire process of charging electric vehicles (EV).
 
