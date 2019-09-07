@@ -1,15 +1,15 @@
-import React, { Component } from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
-import Fab from '@material-ui/core/Fab';
-import { APP_NAME } from '../constants/App';
-import ForwardIcon from '@material-ui/icons/Forward';
-import { withSnackbar } from 'notistack';
-import { SIGN_IN_ENDPOINT } from '../constants/Endpoints';
-import { withAuthenticationContext } from '../authentication/Context';
-import PasswordValidator from '../components/PasswordValidator';
+import React, { Component } from "react";
+import { withStyles } from "@material-ui/core/styles";
+import { TextValidator, ValidatorForm } from "react-material-ui-form-validator";
+import Paper from "@material-ui/core/Paper";
+import Typography from "@material-ui/core/Typography";
+import Fab from "@material-ui/core/Fab";
+import { APP_NAME } from "../constants/App";
+import ForwardIcon from "@material-ui/icons/Forward";
+import { withSnackbar } from "notistack";
+import { SIGN_IN_ENDPOINT } from "../constants/Endpoints";
+import { withAuthenticationContext } from "../authentication/Context";
+import PasswordValidator from "../components/PasswordValidator";
 
 const styles = theme => {
   return {
@@ -33,26 +33,24 @@ const styles = theme => {
       width: "100%"
     },
     extendedIcon: {
-      marginRight: theme.spacing(0.5),
+      marginRight: theme.spacing(0.5)
     },
     textField: {
       width: "100%"
     },
     button: {
       marginRight: theme.spacing(2),
-      marginTop: theme.spacing(2),
+      marginTop: theme.spacing(2)
     }
-  }
-}
-
+  };
+};
 
 class SignInPage extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
-      username: '',
-      password: '',
+      username: "",
+      password: "",
       processing: false
     };
   }
@@ -66,10 +64,10 @@ class SignInPage extends Component {
     const { authenticationContext } = this.props;
     this.setState({ processing: true });
     fetch(SIGN_IN_ENDPOINT, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({ username, password }),
       headers: new Headers({
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json"
       })
     })
       .then(response => {
@@ -80,12 +78,13 @@ class SignInPage extends Component {
         } else {
           throw Error("Invalid status code: " + response.status);
         }
-      }).then(json => {
+      })
+      .then(json => {
         authenticationContext.signIn(json.access_token);
       })
       .catch(error => {
         this.props.enqueueSnackbar(error.message, {
-          variant: 'warning',
+          variant: "warning"
         });
         this.setState({ processing: false });
       });
@@ -97,31 +96,39 @@ class SignInPage extends Component {
     return (
       <div className={classes.loginPage}>
         <Paper className={classes.loginPanel}>
-          <Typography variant="h4">{APP_NAME}</Typography>
+          <Typography variant="h4" color="primary">
+            {APP_NAME}
+          </Typography>
           <ValidatorForm onSubmit={this.onSubmit}>
             <TextValidator
               disabled={processing}
-              validators={['required']}
-              errorMessages={['Username is required']}
+              validators={["required"]}
+              errorMessages={["Username is required"]}
               name="username"
               label="Username"
               className={classes.textField}
               value={username}
-              onChange={this.handleValueChange('username')}
+              onChange={this.handleValueChange("username")}
               margin="normal"
             />
             <PasswordValidator
               disabled={processing}
-              validators={['required']}
-              errorMessages={['Password is required']}
+              validators={["required"]}
+              errorMessages={["Password is required"]}
               name="password"
               label="Password"
               className={classes.textField}
               value={password}
-              onChange={this.handleValueChange('password')}
+              onChange={this.handleValueChange("password")}
               margin="normal"
             />
-            <Fab variant="extended" color="primary" className={classes.button} type="submit" disabled={processing}>
+            <Fab
+              variant="extended"
+              color="primary"
+              className={classes.button}
+              type="submit"
+              disabled={processing}
+            >
               <ForwardIcon className={classes.extendedIcon} />
               Sign In
             </Fab>
@@ -130,7 +137,6 @@ class SignInPage extends Component {
       </div>
     );
   }
-
 }
 
 export default withAuthenticationContext(
