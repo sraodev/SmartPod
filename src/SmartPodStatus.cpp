@@ -6,6 +6,8 @@ SmartPodStatus::SmartPodStatus(AsyncWebServer *server, SecurityManager* security
   );
 }
 
+SmartPodStatus::~SmartPodStatus(){}
+
 void SmartPodStatus::spStatus(AsyncWebServerRequest *request){
     AsyncJsonResponse * response = new AsyncJsonResponse(MAX_SP_STATUS_SIZE);
     JsonObject root = response->getRoot();
@@ -15,6 +17,3 @@ void SmartPodStatus::spStatus(AsyncWebServerRequest *request){
 
 }
 
-SmartPodStatus::~SmartPodStatus()
-{
-}

@@ -28,6 +28,8 @@ SmartPodService::SmartPodService(uint8_t pin, ACS712_type type, int32_t currentS
 {
 }
 
+SmartPodService::~SmartPodService(){}
+
 /*!
  *  @brief  Setup sensor (calls begin on It)
  */
@@ -273,8 +275,4 @@ void SmartPodService::Current::getSensor(sensor_t *sensor)
     sensor->resolution = 0.0F;
     break;
   }
-}
-
-SmartPodService::~SmartPodService()
-{
 }
