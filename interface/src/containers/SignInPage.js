@@ -97,7 +97,7 @@ class SignInPage extends Component {
       <div className={classes.loginPage}>
         <Paper className={classes.loginPanel}>
           <Typography variant="h4" color="primary">
-            {APP_NAME}
+            {a}
           </Typography>
           <ValidatorForm onSubmit={this.onSubmit}>
             <TextValidator

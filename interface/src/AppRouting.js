@@ -1,22 +1,22 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
-import { Redirect, Switch } from 'react-router';
+import { Redirect, Switch } from "react-router";
 
-import * as Authentication from './authentication/Authentication';
-import AuthenticationWrapper from './authentication/AuthenticationWrapper';
-import AuthenticatedRoute from './authentication/AuthenticatedRoute';
-import UnauthenticatedRoute from './authentication/UnauthenticatedRoute';
+import * as Authentication from "./authentication/Authentication";
+import AuthenticationWrapper from "./authentication/AuthenticationWrapper";
+import AuthenticatedRoute from "./authentication/AuthenticatedRoute";
+import UnauthenticatedRoute from "./authentication/UnauthenticatedRoute";
 
-import SignInPage from './containers/SignInPage';
+import SignInPage from "./containers/SignInPage";
 
-import WiFiConnection from './sections/WiFiConnection';
-import AccessPoint from './sections/AccessPoint';
-import NetworkTime from './sections/NetworkTime';
-import Security from './sections/Security';
-import System from './sections/System';
+import WiFiConnection from "./sections/WiFiConnection";
+import AccessPoint from "./sections/AccessPoint";
+import NetworkTime from "./sections/NetworkTime";
+import Security from "./sections/Security";
+import System from "./sections/System";
+import Dashboard from "./sections/Dashboard";
 
 class AppRouting extends Component {
-
   componentWillMount() {
     Authentication.clearLoginRedirect();
   }
@@ -26,6 +26,7 @@ class AppRouting extends Component {
       <AuthenticationWrapper>
         <Switch>
           <UnauthenticatedRoute exact path="/" component={SignInPage} />
+          <AuthenticatedRoute exact path="/dash/*" component={Dashboard} />
           <AuthenticatedRoute exact path="/wifi/*" component={WiFiConnection} />
           <AuthenticatedRoute exact path="/ap/*" component={AccessPoint} />
           <AuthenticatedRoute exact path="/ntp/*" component={NetworkTime} />
@@ -34,7 +35,7 @@ class AppRouting extends Component {
           <Redirect to="/" />
         </Switch>
       </AuthenticationWrapper>
-    )
+    );
   }
 }
 
