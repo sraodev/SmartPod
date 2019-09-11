@@ -66,7 +66,7 @@ bool SmartPodService::getEvent(sp_sensors_event_t *sp_event){
   sp_event->power = sp_event->sensor->voltage * sp_event->sensor->current;
   sp_event->energyUsage = 0; // TODO: Need to calculate
   sp_event->energyTraiff = 0; // TODO: Need to read from JSON file
-  sp_event->energyTraiff = 0; // TODO: Need to calcualte
+  sp_event->energyBill = 0; // TODO: Need to calcualte
 
   return true;
 }

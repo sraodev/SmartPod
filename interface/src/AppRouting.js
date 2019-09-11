@@ -8,13 +8,12 @@ import AuthenticatedRoute from "./authentication/AuthenticatedRoute";
 import UnauthenticatedRoute from "./authentication/UnauthenticatedRoute";
 
 import SignInPage from "./containers/SignInPage";
-
+import SmartPod from "./sections/SmartPod";
 import WiFiConnection from "./sections/WiFiConnection";
 import AccessPoint from "./sections/AccessPoint";
 import NetworkTime from "./sections/NetworkTime";
 import Security from "./sections/Security";
 import System from "./sections/System";
-import Dashboard from "./sections/Dashboard";
 
 class AppRouting extends Component {
   componentWillMount() {
@@ -26,7 +25,7 @@ class AppRouting extends Component {
       <AuthenticationWrapper>
         <Switch>
           <UnauthenticatedRoute exact path="/" component={SignInPage} />
-          <AuthenticatedRoute exact path="/dash/*" component={Dashboard} />
+          <AuthenticatedRoute exact path="/smartpod/*" component={SmartPod} />
           <AuthenticatedRoute exact path="/wifi/*" component={WiFiConnection} />
           <AuthenticatedRoute exact path="/ap/*" component={AccessPoint} />
           <AuthenticatedRoute exact path="/ntp/*" component={NetworkTime} />

@@ -1,8 +1,8 @@
-import history from '../history';
+import history from "../history";
 
-export const ACCESS_TOKEN = 'access_token';
-export const LOGIN_PATHNAME = 'loginPathname';
-export const LOGIN_SEARCH = 'loginSearch';
+export const ACCESS_TOKEN = "access_token";
+export const LOGIN_PATHNAME = "loginPathname";
+export const LOGIN_SEARCH = "loginSearch";
 
 export function storeLoginRedirect(location) {
   if (location) {
@@ -21,7 +21,7 @@ export function fetchLoginRedirect() {
   const loginSearch = localStorage.getItem(LOGIN_SEARCH);
   clearLoginRedirect();
   return {
-    pathname: loginPathname || "/wifi/",
+    pathname: loginPathname || "/smartpod/",
     search: (loginPathname && loginSearch) || undefined
   };
 }
@@ -33,9 +33,9 @@ export function authorizedFetch(url, params) {
   const accessToken = localStorage.getItem(ACCESS_TOKEN);
   if (accessToken) {
     params = params || {};
-    params.credentials = 'include';
+    params.credentials = "include";
     params.headers = params.headers || {};
-    params.headers.Authorization = 'Bearer ' + accessToken;
+    params.headers.Authorization = "Bearer " + accessToken;
   }
   return fetch(url, params);
 }
@@ -44,15 +44,17 @@ export function authorizedFetch(url, params) {
  * Wraps the normal fetch routene which redirects on 401 response.
  */
 export function redirectingAuthorizedFetch(url, params) {
-  return new Promise(function (resolve, reject) {
-    authorizedFetch(url, params).then(response => {
-      if (response.status === 401) {
-        history.push("/unauthorized");        
-      } else {
-        resolve(response);
-      }
-    }).catch(error => {
-      reject(error);
-    });
+  return new Promise(function(resolve, reject) {
+    authorizedFetch(url, params)
+      .then(response => {
+        if (response.status === 401) {
+          history.push("/unauthorized");
+        } else {
+          resolve(response);
+        }
+      })
+      .catch(error => {
+        reject(error);
+      });
   });
 }

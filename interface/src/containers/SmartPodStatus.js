@@ -11,12 +11,15 @@ import ListItemText from "@material-ui/core/ListItemText";
 import Avatar from "@material-ui/core/Avatar";
 import Divider from "@material-ui/core/Divider";
 import DevicesIcon from "@material-ui/icons/Devices";
-import MemoryIcon from "@material-ui/icons/Memory";
+import OfflineBoltIcon from "@material-ui/icons/OfflineBolt";
+import PowerIcon from "@material-ui/icons/Power";
 import ShowChartIcon from "@material-ui/icons/ShowChart";
+import DescriptionIcon from "@material-ui/icons/Description";
+import MonetizationOnIcon from "@material-ui/icons/MonetizationOn";
 import SdStorageIcon from "@material-ui/icons/SdStorage";
 import DataUsageIcon from "@material-ui/icons/DataUsage";
 
-import { SYSTEM_STATUS_ENDPOINT } from "../constants/Endpoints";
+import { SMARTPOD_STATUS_ENDPOINT } from "../constants/Endpoints";
 import { restComponent } from "../components/RestComponent";
 import SectionContent from "../components/SectionContent";
 
@@ -31,7 +34,7 @@ const styles = theme => ({
   }
 });
 
-class SystemStatus extends Component {
+class SmartPodStatus extends Component {
   componentDidMount() {
     this.props.loadData();
   }
@@ -42,10 +45,10 @@ class SystemStatus extends Component {
         <ListItem>
           <ListItemAvatar>
             <Avatar>
-              <DevicesIcon />
+              <OfflineBoltIcon />
             </Avatar>
           </ListItemAvatar>
-          <ListItemText primary="Platform" secondary={data.esp_platform} />
+          <ListItemText primary="Voltage" secondary={data.voltage + "V"} />
         </ListItem>
         <Divider variant="inset" component="li" />
         <ListItem>
@@ -54,22 +57,16 @@ class SystemStatus extends Component {
               <ShowChartIcon />
             </Avatar>
           </ListItemAvatar>
-          <ListItemText
-            primary="CPU Frequency"
-            secondary={data.cpu_freq_mhz + " MHz"}
-          />
+          <ListItemText primary="Current" secondary={data.current + " Amp"} />
         </ListItem>
         <Divider variant="inset" component="li" />
         <ListItem>
           <ListItemAvatar>
             <Avatar>
-              <MemoryIcon />
+              <PowerIcon />
             </Avatar>
           </ListItemAvatar>
-          <ListItemText
-            primary="Free Heap"
-            secondary={data.free_heap + " bytes"}
-          />
+          <ListItemText primary="Power" secondary={data.power + " Watts"} />
         </ListItem>
         <Divider variant="inset" component="li" />
         <ListItem>
@@ -79,22 +76,32 @@ class SystemStatus extends Component {
             </Avatar>
           </ListItemAvatar>
           <ListItemText
-            primary="Sketch Size (used/max)"
-            secondary={
-              data.sketch_size + " / " + data.free_sketch_space + " bytes"
-            }
+            primary="Energy Usage"
+            secondary={data.energy_usage + " KWh"}
           />
         </ListItem>
         <Divider variant="inset" component="li" />
         <ListItem>
           <ListItemAvatar>
             <Avatar>
-              <SdStorageIcon />
+              <DescriptionIcon />
             </Avatar>
           </ListItemAvatar>
           <ListItemText
-            primary="Flash Chip Size"
-            secondary={data.flash_chip_size + " bytes"}
+            primary="Energy Traiff"
+            secondary={data.energy_traiff + " INR"}
+          />
+        </ListItem>
+        <Divider variant="inset" component="li" />
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar>
+              <MonetizationOnIcon />
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText
+            primary="Energy Bill"
+            secondary={data.energy_bill + " INR"}
           />
         </ListItem>
         <Divider variant="inset" component="li" />
@@ -121,7 +128,7 @@ class SystemStatus extends Component {
   render() {
     const { data, fetched, errorMessage, classes } = this.props;
     return (
-      <SectionContent title="System Status">
+      <SectionContent title="Smart Pod Status">
         {!fetched ? (
           <div>
             <LinearProgress className={classes.fetching} />
@@ -152,6 +159,6 @@ class SystemStatus extends Component {
 }
 
 export default restComponent(
-  SYSTEM_STATUS_ENDPOINT,
-  withStyles(styles)(SystemStatus)
+  SMARTPOD_STATUS_ENDPOINT,
+  withStyles(styles)(SmartPodStatus)
 );

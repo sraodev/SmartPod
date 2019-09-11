@@ -1,28 +1,29 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
 
-import { WIFI_SETTINGS_ENDPOINT }  from  '../constants/Endpoints';
-import { restComponent } from '../components/RestComponent';
-import SectionContent from '../components/SectionContent';
-import WiFiSettingsForm from '../forms/WiFiSettingsForm';
+import { WIFI_SETTINGS_ENDPOINT } from "../constants/Endpoints";
+import { restComponent } from "../components/RestComponent";
+import SectionContent from "../components/SectionContent";
+import WiFiSettingsForm from "../forms/WiFiSettingsForm";
 
 class WiFiSettings extends Component {
-
   constructor(props) {
     super(props);
 
-    this.deselectNetworkAndLoadData = this.deselectNetworkAndLoadData.bind(this);
+    this.deselectNetworkAndLoadData = this.deselectNetworkAndLoadData.bind(
+      this
+    );
   }
 
   componentDidMount() {
     const { selectedNetwork } = this.props;
     if (selectedNetwork) {
       var wifiSettings = {
-        ssid:selectedNetwork.ssid,
-        password:"",
-        hostname:"esp8266-react",
-        static_ip_config:false,
-      }
+        ssid: selectedNetwork.ssid,
+        password: "",
+        hostname: "smartpod",
+        static_ip_config: false
+      };
       this.props.setData(wifiSettings);
     } else {
       this.props.loadData();
@@ -38,7 +39,7 @@ class WiFiSettings extends Component {
     const { data, fetched, errorMessage, selectedNetwork } = this.props;
     return (
       <SectionContent title="WiFi Settings">
-      	<WiFiSettingsForm
+        <WiFiSettingsForm
           wifiSettings={data}
           wifiSettingsFetched={fetched}
           errorMessage={errorMessage}
@@ -50,9 +51,8 @@ class WiFiSettings extends Component {
           handleCheckboxChange={this.props.handleCheckboxChange}
         />
       </SectionContent>
-    )
+    );
   }
-
 }
 
 WiFiSettings.propTypes = {

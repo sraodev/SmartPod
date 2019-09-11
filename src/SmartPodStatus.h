@@ -14,8 +14,10 @@
 #include <AsyncArduinoJson6.h>
 #include <SecurityManager.h>
 
-#define MAX_SP_STATUS_SIZE 1024
-#define SP_STATUS_SERVICE_PATH "/rest/ntpStatus"
+#define MAX_ESP_STATUS_SIZE 1024
+ 
+#define MAX_SMARTPOD_STATUS_SIZE 1024
+#define SMARTPOD_STATUS_SERVICE_PATH "/rest/smartpodStatus"
 
 class SmartPodStatus
 {
@@ -28,6 +30,6 @@ private:
     AsyncWebServer *_server;
     SecurityManager* _securityManager;
 
-    void spStatus(AsyncWebServerRequest *request);
+    void smartpodStatus(AsyncWebServerRequest *request);
 };
 #endif /* SMARTPODSTATUS_H */

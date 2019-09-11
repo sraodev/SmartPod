@@ -18,7 +18,6 @@ import ListItemText from "@material-ui/core/ListItemText";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import Popper from "@material-ui/core/Popper";
 import MenuIcon from "@material-ui/icons/Menu";
-import DashboardIcon from "@material-ui/icons/Dashboard";
 import SettingsInputSvideoIcon from "@material-ui/icons/SettingsInputSvideo";
 import WifiIcon from "@material-ui/icons/Wifi";
 import SettingsIcon from "@material-ui/icons/Settings";
@@ -130,19 +129,8 @@ class MenuAppBar extends React.Component {
         <Divider />
         <List>
           <ListItem
-            to="/dash/"
-            selected={path.startsWith("/dash/")}
-            button
-            component={Link}
-          >
-            <ListItemIcon>
-              <DashboardIcon />
-            </ListItemIcon>
-            <ListItemText primary="Dashboard" />
-          </ListItem>
-          <ListItem
-            to="/dash/"
-            selected={path.startsWith("/dash/")}
+            to="/smartpod/"
+            selected={path.startsWith("/smartpod/")}
             button
             component={Link}
           >
@@ -152,8 +140,8 @@ class MenuAppBar extends React.Component {
             <ListItemText primary="Smart Pod" />
           </ListItem>
           <ListItem
-            to="/smartpod/"
-            selected={path.startsWith("/smartpod/")}
+            to="/wifi/"
+            selected={path.startsWith("/wifi/")}
             button
             component={Link}
           >
