@@ -1,8 +1,6 @@
-# Smart Pod
+# Smart![Icon](/media/smartpod.png?raw=true "Icon")Pod
 
-[![Build Status](https://travis-ci.org/rjwats/esp8266-react.svg?branch=master)](https://travis-ci.org/rjwats/esp8266-react)
-
-A simple, secure and extensible framework for IoT projects built on ESP8266/ESP32 platforms with responsive React front-end.
+Smart Pod addresses the entire process of charging electric vehicles (EV).
 
 Designed to work with the PlatformIO IDE with [limited setup](#getting-started). Please read below for setup, build and upload instructions.
 
