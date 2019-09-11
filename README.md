@@ -1,4 +1,4 @@
-# ESP8266 React
+# Smart Pod
 
 [![Build Status](https://travis-ci.org/rjwats/esp8266-react.svg?branch=master)](https://travis-ci.org/rjwats/esp8266-react)
 
@@ -12,11 +12,11 @@ Designed to work with the PlatformIO IDE with [limited setup](#getting-started).
 
 Provides many of the features required for IoT projects:
 
-* Configurable WiFi - Network scanner and WiFi configuration screen
-* Configurable Access Point - Can be continuous or automatically enabled when WiFi connection fails
-* Network Time - Synchronization with NTP
-* Remote Firmware Updates - Enable secured OTA updates
-* Security - Protected RESTful endpoints and a secured user interface
+- Configurable WiFi - Network scanner and WiFi configuration screen
+- Configurable Access Point - Can be continuous or automatically enabled when WiFi connection fails
+- Network Time - Synchronization with NTP
+- Remote Firmware Updates - Enable secured OTA updates
+- Security - Protected RESTful endpoints and a secured user interface
 
 The back end is provided by a set of RESTful endpoints and the React based front end is responsive and scales well to various screen sizes.
 
@@ -28,9 +28,9 @@ The front end has the prerequisite manifest file and icon, so it can be added to
 
 You will need the following before you can get started.
 
-* [PlatformIO](https://platformio.org/) - IDE for development
-* [Node.js](https://nodejs.org) - For building the interface with npm
-* Bash shell, or [Git Bash](https://gitforwindows.org/) if you are under windows
+- [PlatformIO](https://platformio.org/) - IDE for development
+- [Node.js](https://nodejs.org) - For building the interface with npm
+- Bash shell, or [Git Bash](https://gitforwindows.org/) if you are under windows
 
 ### Building and uploading the firmware
 
@@ -38,16 +38,16 @@ Pull the project and open it in PlatformIO. PlatformIO should download the ESP82
 
 The project structure is as follows:
 
-Resource | Description
----- | -----------
-[data/](data) | The file system image directory
-[interface/](interface) | React based front end
-[src/](src) | C++ back end for the ESP8266 device
-[platformio.ini](platformio.ini) | PlatformIO project configuration file
+| Resource                         | Description                           |
+| -------------------------------- | ------------------------------------- |
+| [data/](data)                    | The file system image directory       |
+| [interface/](interface)          | React based front end                 |
+| [src/](src)                      | C++ back end for the ESP8266 device   |
+| [platformio.ini](platformio.ini) | PlatformIO project configuration file |
 
 ### Building the firmware
 
-Once the platform and libraries are downloaded the back end should successfully build within PlatformIO. 
+Once the platform and libraries are downloaded the back end should successfully build within PlatformIO.
 
 The firmware may be built by pressing the "Build" button:
 
@@ -61,7 +61,7 @@ platformio run
 
 #### Uploading the firmware
 
-The project is configured to upload over a serial connection by default. You can change this to use OTA updates by uncommenting the relevant lines in ['platformio.ini'](platformio.ini). 
+The project is configured to upload over a serial connection by default. You can change this to use OTA updates by uncommenting the relevant lines in ['platformio.ini'](platformio.ini).
 
 The firmware may be uploaded to the device by pressing the "Upload" button:
 
@@ -142,31 +142,31 @@ You can enable CORS on the back end by uncommenting the -D ENABLE_CORS build fla
 
 As well as containing the interface, the SPIFFS image (in the ['data'](data) folder) contains a JSON settings file for each of the configurable features. The config files can be found in the ['data/config'](data/config) directory:
 
-File | Description
----- | -----------
-[apSettings.json](data/config/apSettings.json) | Access point settings
-[ntpSettings.json](data/config/ntpSettings.json) | NTP synchronization settings
-[otaSettings.json](data/config/otaSettings.json) | OTA update configuration
-[securitySettings.json](data/config/securitySettings.json) | Security settings and user credentials
-[wifiSettings.json](data/config/wifiSettings.json) | WiFi connection settings
+| File                                                       | Description                            |
+| ---------------------------------------------------------- | -------------------------------------- |
+| [apSettings.json](data/config/apSettings.json)             | Access point settings                  |
+| [ntpSettings.json](data/config/ntpSettings.json)           | NTP synchronization settings           |
+| [otaSettings.json](data/config/otaSettings.json)           | OTA update configuration               |
+| [securitySettings.json](data/config/securitySettings.json) | Security settings and user credentials |
+| [wifiSettings.json](data/config/wifiSettings.json)         | WiFi connection settings               |
 
 ### Access point settings
 
 The default settings configure the device to bring up an access point on start up which can be used to configure the device:
 
-* SSID: ESP8266-React
-* Password: esp-react
+- SSID: ESP8266-React
+- Password: esp-react
 
 ### Security settings and user credentials
 
 The security settings and user credentials provide the following users by default:
 
-Username | Password
--------- | --------
-admin    | admin
-guest    | guest
+| Username | Password |
+| -------- | -------- |
+| admin    | admin    |
+| guest    | guest    |
 
-It is recommended that you change the JWT secret and user credentials from their defaults protect your device. You can do this in the user interface, or by modifying [securitySettings.json](data/config/securitySettings.json) before uploading the file system image. 
+It is recommended that you change the JWT secret and user credentials from their defaults protect your device. You can do this in the user interface, or by modifying [securitySettings.json](data/config/securitySettings.json) before uploading the file system image.
 
 ## Building for different devices
 
@@ -184,7 +184,7 @@ platform = espressif8266
 board = esp12e
 ```
 
-If you want to build for an ESP32 device, all you need to do is re-configure ['platformio.ini'](platformio.ini) with your devices settings. 
+If you want to build for an ESP32 device, all you need to do is re-configure ['platformio.ini'](platformio.ini) with your devices settings.
 
 ![ESP32](/media/esp32.jpg?raw=true "ESP32")
 
@@ -212,15 +212,14 @@ const theme = createMuiTheme({
     highlight_idle: blueGrey[900],
     highlight_warn: orange[500],
     highlight_error: red[500],
-    highlight_success: green[500],
-  },
+    highlight_success: green[500]
+  }
 });
 ```
 
 ### Changing the app icon
 
 You can replace the app icon is located at ['interface/public/app/icon.png'](interface/public/app/icon.png) with one of your preference. A 256 x 256 PNG is recommended for best compatibility.
-
 
 ### Changing the app name
 
@@ -234,16 +233,16 @@ There is also a manifest file which contains the app name to use when adding the
 
 ```json
 {
-  "name":"Funky IoT Project",
-  "icons":[
+  "name": "Funky IoT Project",
+  "icons": [
     {
-      "src":"/app/icon.png",
-      "sizes":"48x48 72x72 96x96 128x128 256x256"
+      "src": "/app/icon.png",
+      "sizes": "48x48 72x72 96x96 128x128 256x256"
     }
   ],
-  "start_url":"/",
-  "display":"fullscreen",
-  "orientation":"any"
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "any"
 }
 ```
 
@@ -251,7 +250,7 @@ There is also a manifest file which contains the app name to use when adding the
 
 The back end is a set of REST endpoints hosted by a [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) instance. The source is split up by feature, for example [WiFiScanner.h](src/WiFiScanner.h) implements the end points for scanning for available networks.
 
-There is an abstract class [SettingsService.h](src/SettingsService.h) that provides an easy means of adding configurable services/features to the device. It takes care of writing the settings as JSON to SPIFFS. All you need to do is extend the class with your required configuration and implement the functions which serialize the settings to/from JSON. JSON serialization utilizes the excellent [ArduinoJson](https://github.com/bblanchon/ArduinoJson) library. 
+There is an abstract class [SettingsService.h](src/SettingsService.h) that provides an easy means of adding configurable services/features to the device. It takes care of writing the settings as JSON to SPIFFS. All you need to do is extend the class with your required configuration and implement the functions which serialize the settings to/from JSON. JSON serialization utilizes the excellent [ArduinoJson](https://github.com/bblanchon/ArduinoJson) library.
 
 Here is a example of a service with username and password settings:
 
@@ -303,7 +302,7 @@ Sometimes you need to perform an action when the settings are updated, you can a
 
 void begin() {
   // make sure we call super, so the settings get read!
-  SettingsService::begin();  
+  SettingsService::begin();
   reconfigureTheService();
 }
 
@@ -319,9 +318,9 @@ void reconfigureTheService() {
 
 ## Libraries Used
 
-* [React](https://reactjs.org/)
-* [Material-UI](https://material-ui-next.com/)
-* [Time](https://github.com/PaulStoffregen/Time)
-* [NtpClient](https://github.com/gmag11/NtpClient)
-* [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
-* [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)
+- [React](https://reactjs.org/)
+- [Material-UI](https://material-ui-next.com/)
+- [Time](https://github.com/PaulStoffregen/Time)
+- [NtpClient](https://github.com/gmag11/NtpClient)
+- [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
+- [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)
