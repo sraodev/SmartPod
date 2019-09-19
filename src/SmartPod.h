@@ -4,14 +4,13 @@
 #include <Arduino.h>
 
 #if defined(ESP8266)
-  #include <ESP8266WiFi.h>
-  #include <ESPAsyncTCP.h>
+#include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
 #elif defined(ESP_PLATFORM)
-  #include <WiFi.h>
-  #include <AsyncTCP.h>
-  #include <SPIFFS.h>
+#include <WiFi.h>
+#include <AsyncTCP.h>
+#include <SPIFFS.h>
 #endif
-
 
 #include <FS.h>
 #include <SecuritySettingsService.h>
@@ -48,6 +47,7 @@ private:
   NTPSettingsService *_ntpSettingsService;
   OTASettingsService *_otaSettingsService;
   AuthenticationService *_authenticationService;
+  SmartPodService *_smartpodService;
 
   WiFiScanner *_wifiScanner;
   WiFiStatus *_wifiStatus;

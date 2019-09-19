@@ -1,10 +1,6 @@
 #include <Arduino.h>
 #include "SmartPod.h"
 
-// Replace with your network credentials
-const char *ssid = "SriFi";
-const char *password = "flying_cheetah_with_a_jetpack_421";
-
 SmartPod::SmartPod()
 {
     _server = new AsyncWebServer(80);
@@ -15,13 +11,14 @@ SmartPod::SmartPod()
     _ntpSettingsService = new NTPSettingsService(_server, &SPIFFS, _securitySettingsService);
     _otaSettingsService = new OTASettingsService(_server, &SPIFFS, _securitySettingsService);
     _authenticationService = new AuthenticationService(_server, _securitySettingsService);
+    _smartpodService = new SmartPodService(_server, &SPIFFS, _securitySettingsService);
 
     _wifiScanner = new WiFiScanner(_server, _securitySettingsService);
     _wifiStatus = new WiFiStatus(_server, _securitySettingsService);
     _ntpStatus = new NTPStatus(_server, _securitySettingsService);
     _apStatus = new APStatus(_server, _securitySettingsService);
     _systemStatus = new SystemStatus(_server, _securitySettingsService);
-    _smartpodStatus = new SmartPodStatus(_server, _securitySettingsService);
+    _smartpodStatus = new SmartPodStatus(_server, _smartpodService, _securitySettingsService);
 }
 
 SmartPod::~SmartPod() {}
@@ -48,6 +45,7 @@ void SmartPod::begin()
 
     // Start server
     _server->begin();
+    _smartpodService->begin();
 }
 
 void SmartPod::connectToWiFi()
@@ -117,4 +115,6 @@ void SmartPod::loop()
     _apSettingsService->loop();
     _ntpSettingsService->loop();
     _otaSettingsService->loop();
+    delay(50);
+    _smartpodService->loop();
 }
