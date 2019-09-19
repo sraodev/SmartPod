@@ -37,9 +37,10 @@ SmartPodService::~SmartPodService() {}
  */
 void SmartPodService::begin()
 {
-  Serial.println("SmartPodService::begin...!");
-  //SettingsService::begin();
-  readFromFS();
+  Serial.print("[SmartPod] Setting Smartpod Service... \t\t\t");
+  SettingsService::begin();
+  Serial.println("[Done]");
+  Serial.print("[SmartPod] Starting Smartpod Service...\t\t\t");
   //_acs712 = new ACS712(_sensor_type, _sensor_pin);
   _acs712 = new ACS712(_sensor_type, A0);
 
@@ -47,14 +48,16 @@ void SmartPodService::begin()
   // It is not necessary, but may positively affect the accuracy
   // Ensure that no current flows through the sensor at this moment
   // If you are not sure that the current through the sensor will not leak during calibration - comment out this method
-  Serial.println("Calibrating... Ensure that no current flows through the sensor at this moment");
-  //_acs712->calibrate();
-  Serial.println("Done!");
+  //Serial.print("[SmartPod] Calibrating smartpod sensor.. Ensure that no current flows through the sensor at this moment: ");
+  _acs712->calibrate();
+  //Serial.println("Done!");
   getSmartPodSensor(&_sp_sensor);
+  Serial.println("[Done]");
 }
 
 void SmartPodService::loop()
 {
+  //Serial.print("[SmartPod] Running smartpod service...");
   getSmartPodEvent(&_sp_sensor_event);
 }
 
@@ -65,14 +68,11 @@ void SmartPodService::loop()
  */
 bool SmartPodService::getSmartPodEvent(sp_sensors_event_t *sp_event)
 {
-  // Clear event definition.
-  memset(sp_event, 0, sizeof(sp_sensors_event_t));
   // Populate sensor reading values.
   getEvent(&(sp_event->sensor));
-
   sp_event->version = sizeof(sp_sensors_event_t);
   sp_event->timestamp = millis();
-  sp_event->power = sp_event->sensor.voltage * sp_event->sensor.current;
+  sp_event->power = sp_event->voltage * sp_event->sensor.current;
   sp_event->energyUsage = 0;  // TODO: Need to calculate
   sp_event->energyTraiff = 0; // TODO: Need to read from JSON file
   sp_event->energyBill = 0;   // TODO: Need to calcualte
@@ -92,7 +92,6 @@ void SmartPodService::getSmartPodSensor(sensor_t *sensor)
  */
 void SmartPodService::setName(sensor_t *sensor)
 {
-  Serial.println("SmartPodService::setName ...!");
   switch (_sensor_type)
   {
   case ACS712_05B:
@@ -120,7 +119,6 @@ void SmartPodService::setName(sensor_t *sensor)
  */
 void SmartPodService::setMinDelay(sensor_t *sensor)
 {
-  Serial.println("SmartPodService::setMinDelay ...!");
   switch (_sensor_type)
   {
   case ACS712_05B:
@@ -147,7 +145,7 @@ void SmartPodService::setMinDelay(sensor_t *sensor)
 bool SmartPodService::getEvent(sensors_event_t *event)
 {
   // Clear event definition.
-  //memset(event, 0, sizeof(sensors_event_t));
+  memset(event, 0, sizeof(sensors_event_t));
   // Populate sensor reading values.
   event->version = sizeof(sensors_event_t);
   event->sensor_id = _sensor_id;
@@ -164,7 +162,6 @@ bool SmartPodService::getEvent(sensors_event_t *event)
  */
 void SmartPodService::getSensor(sensor_t *sensor)
 {
-  Serial.println("SmartPodService::getSensor ...!");
   // Clear sensor definition.
   memset(sensor, 0, sizeof(sensor_t));
   // Set sensor name.
@@ -203,85 +200,52 @@ void SmartPodService::getSensor(sensor_t *sensor)
 
 float SmartPodService::getVoltage()
 {
-  Serial.print("SmartPodService::getVoltage() :");
-  Serial.println(_sp_sensor_event.sensor.voltage);
-  return _sp_sensor_event.sensor.voltage;
-}
-void SmartPodService::setVoltage(float voltage)
-{
-  Serial.print("SmartPodService::setVoltage() :");
-  Serial.println(voltage);
-  _sp_sensor_event.sensor.voltage = voltage;
+  return _sp_sensor_event.voltage;
 }
 
 float SmartPodService::getCurrent()
 {
-  Serial.print("SmartPodService::getCurrent() :");
-  Serial.println(_sp_sensor_event.sensor.current);
   return _sp_sensor_event.sensor.current;
 }
 
 float SmartPodService::getPower()
 {
-  Serial.print("SmartPodService::getPower() :");
-  Serial.println(_sp_sensor_event.power);
   return _sp_sensor_event.power;
 }
 
 float SmartPodService::getEnergyUsage()
 {
-  Serial.print("SmartPodService::getEnergyUsage() :");
-  Serial.println(_sp_sensor_event.energyUsage);
   return _sp_sensor_event.energyUsage;
 }
 
 float SmartPodService::getEnergyTraiff()
 {
-  Serial.print("SmartPodService::getEnergyTraiff() :");
-  Serial.println(_sp_sensor_event.energyTraiff);
   return _sp_sensor_event.energyTraiff;
 }
 
 float SmartPodService::getEnergyBill()
 {
-  Serial.print("SmartPodService::getEnergyBill() :");
-  Serial.println(_sp_sensor_event.energyBill);
   return _sp_sensor_event.energyBill;
 }
 
 void SmartPodService::readFromJsonObject(JsonObject &root)
 {
   _sensor_type = ACS712Type[root["sensor_type"] | "ACS712_30A"];
-  Serial.print("SmartPodService::_sensor_type() :");
-  Serial.println(_sensor_type);
-
-  _sensor_pin = root["sensor_pin"] | 1;
-  Serial.print("SmartPodService::sensor_pin() :");
-  Serial.println(_sensor_pin);
-
-  _sensor_id = root["sensor_id"] | 1;
-  Serial.print("SmartPodService::sensor_id() :");
-  Serial.println(_sensor_id);
-
+  _sensor_pin = root["sensor_pin"] | DEFAULT_SMARTPOD_SENSOR_PIN;
+  _sensor_id = root["sensor_id"] | DEFAULT_SMARTPOD_SENSOR_ID;
   _sp_sensor_event.frequency = root["frequency"] | DEFAULT_SMARTPOD_FREQUENCY;
-  Serial.print("SmartPodService::frequency() :");
-  Serial.println(_sp_sensor_event.frequency);
-
-  _sp_sensor_event.sensor.voltage = root["voltage"] | DEFAULT_SMARTPOD_VOLTAGE;
-  Serial.print("SmartPodService::voltage() :");
-  Serial.println(_sp_sensor_event.sensor.voltage);
-
-  _sp_sensor_event.sensor.current = root["current"] | 0.0;
-  _sp_sensor_event.power = root["power"] | 0.0;
-  _sp_sensor_event.energyUsage = root["energy_usage"] | 0.0;
-  _sp_sensor_event.energyTraiff = root["energy_traiff"] | 0.0;
-  _sp_sensor_event.energyBill = root["energy_bill"] | 0.0;
+  _sp_sensor_event.voltage = root["voltage"] | DEFAULT_SMARTPOD_VOLTAGE;
+  _sp_sensor_event.sensor.current = root["current"] | DEFAULT_SMARTPOD_CURRENT;
+  _sp_sensor_event.power = root["power"] | DEFAULT_SMARTPOD_POWER;
+  _sp_sensor_event.energyUsage = root["energy_usage"] | DEFAULT_SMARTPOD_ENERGY_USAGE;
+  _sp_sensor_event.energyTraiff = root["energy_traiff"] | DEFAULT_SMARTPOD_ENGERY_TRAIFF;
+  _sp_sensor_event.energyBill = root["energy_bill"] | DEFAULT_SMARTPOD_ENGERY_BILL;
 }
 
 void SmartPodService::writeToJsonObject(JsonObject &root)
 {
   // smartpod event value
-  root["voltage"] = _sp_sensor_event.sensor.voltage;
+  root["voltage"] = _sp_sensor_event.voltage;
   root["current"] = _sp_sensor_event.sensor.current;
   root["power"] = _sp_sensor_event.power;
   root["energy_usage"] = _sp_sensor_event.energyUsage;
@@ -291,4 +255,20 @@ void SmartPodService::writeToJsonObject(JsonObject &root)
 
 void SmartPodService::onConfigUpdated()
 {
+}
+
+void SmartPodService::spinWheel()
+{
+  delay(1);
+  Serial.print("\b\\");
+  Serial.flush();
+  delay(1);
+  Serial.print("\b|");
+  Serial.flush();
+  delay(1);
+  Serial.print("\b/");
+  Serial.flush();
+  delay(1);
+  Serial.print("\b-");
+  Serial.flush();
 }

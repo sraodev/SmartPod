@@ -10,9 +10,17 @@
 #define SMARTPOD_SETTINGS_FILE "/config/spSettings.json"
 #define SMARTPOD_SETTINGS_SERVICE_PATH "/rest/smartpodSettings"
 
-#define ACS712_SENSOR_VERSION 1			/**< Sensor Version */
-#define DEFAULT_SMARTPOD_VOLTAGE 230.0  /**< The voltage in India is 230 volts */
-#define DEFAULT_SMARTPOD_FREQUENCY 50.0 /**< 50 cycles (Hertz) per second */
+#define ACS712_SENSOR_VERSION 1					/**< Sensor Version */
+#define DEFAULT_SMARTPOD_SENSOR_TYPE ACS712_30A /**< The default sensor type ACS712_30A */
+#define DEFAULT_SMARTPOD_SENSOR_PIN A0			/**< The default sensor pin A0 */
+#define DEFAULT_SMARTPOD_SENSOR_ID 712			/**< The default sensor id 712 */
+#define DEFAULT_SMARTPOD_VOLTAGE 230.0			/**< The voltage in India is 230 volts */
+#define DEFAULT_SMARTPOD_FREQUENCY 50.0			/**< 50 cycles (Hertz) per second */
+#define DEFAULT_SMARTPOD_CURRENT 0.0			/**< Default current  zero amps */
+#define DEFAULT_SMARTPOD_POWER 0.0				/**< Default power  zero watts */
+#define DEFAULT_SMARTPOD_ENERGY_USAGE 0.0		/**< Default energy usage  zero kilowatts */
+#define DEFAULT_SMARTPOD_ENGERY_TRAIFF 0.0		/**< Default energy traiff  zero INR */
+#define DEFAULT_SMARTPOD_ENGERY_BILL 0.0		/**< Default energy bill  zero INR */
 
 /* Smart Pod Sensor event ( bytes) */
 /** struct sp_sensor_event_s is used to provide a single sensor event in a common format. */
@@ -20,6 +28,7 @@ typedef struct
 {
 	int32_t version;	/**< must be sizeof(struct sensors_event_t) */
 	int32_t timestamp;  /**< time is in milliseconds */
+	float voltage;		/**< voltage in volts (V) */
 	float frequency;	/**< 50 cycles (Hertz) per second */
 	float power;		/**< power in watts (W) */
 	float energyUsage;  /**< energy in Watts Hour (Wh) */
@@ -50,8 +59,6 @@ public:
 	void getSensor(sensor_t *sensor);
 
 	float getVoltage();
-	void setVoltage(float voltage);
-
 	float getCurrent();
 	float getPower();
 	float getEnergyUsage();
@@ -74,6 +81,7 @@ private:
 
 	void setName(sensor_t *sensor);
 	void setMinDelay(sensor_t *sensor);
+	void spinWheel();
 };
 
 #endif /* SMARTPODSERVICE_H */

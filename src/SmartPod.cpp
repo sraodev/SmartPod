@@ -36,10 +36,21 @@ void SmartPod::begin()
     _securitySettingsService->begin();
 
     // Start services
+    Serial.print("[SmartPod] Starting NTP Service...\t\t\t");
     _ntpSettingsService->begin();
+    Serial.println("[Done]");
+
+    Serial.print("[SmartPod] Starting OTA Service...\t\t\t");
     _otaSettingsService->begin();
+    Serial.println("[Done]");
+
+    Serial.print("[SmartPod] Starting AP Service...\t\t\t");
     _apSettingsService->begin();
+    Serial.println("[Done]");
+
+    Serial.print("[SmartPod] Starting WiFi Service...\t\t\t");
     _wifiSettingsService->begin();
+    Serial.println("[Done]");
 
     setServerStaticResource(_server);
 
@@ -66,13 +77,14 @@ void SmartPod::connectToWiFi()
  */
 void SmartPod::mountSPIFFS()
 {
-    Serial.println("Mounting SPIFFS file system...");
+    Serial.println("[SmartPod] Starting SPIFFS Service...");
+    Serial.print("[SmartPod] Mounting SPIFFS file system...\t\t\t");
     if (!SPIFFS.begin())
     {
         Serial.println("An Error has occurred while mounting SPIFFS");
         return;
     }
-    Serial.println("SPIFFS file system mounted successfully...");
+    Serial.println("[Done]");
 }
 
 void SmartPod::setServerStaticResource(AsyncWebServer *server)
