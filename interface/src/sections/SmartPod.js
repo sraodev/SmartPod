@@ -16,7 +16,6 @@ class SmartPod extends Component {
   };
 
   render() {
-    const { authenticationContext } = this.props;
     return (
       <MenuAppBar sectionTitle="Smart Pod">
         <Tabs

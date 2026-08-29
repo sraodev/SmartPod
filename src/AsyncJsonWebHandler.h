@@ -77,7 +77,11 @@ class AsyncJsonWebHandler: public AsyncWebHandler {
       // parse JSON and if possible handle the request
       if (request->_tempObject) {
         DynamicJsonDocument jsonDocument(_maxContentLength);
-        DeserializationError error = deserializeJson(jsonDocument, (uint8_t *) request->_tempObject);
+        DeserializationError error = deserializeJson(
+          jsonDocument,
+          (uint8_t *) request->_tempObject,
+          request->contentLength()
+        );
         if (error == DeserializationError::Ok) {
           _onRequest(request, jsonDocument);
         }else{
@@ -94,7 +98,8 @@ class AsyncJsonWebHandler: public AsyncWebHandler {
     virtual void handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) override final {
       if (_onRequest) {
         // don't allocate if data is too large
-        if (total > _maxContentLength){
+        if (total == 0 || total != request->contentLength() ||
+            total > _maxContentLength || index > total || len > total - index){
           return;
         }
 

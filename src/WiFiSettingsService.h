@@ -29,10 +29,10 @@ class WiFiSettingsService : public AdminSettingsService {
     String _ssid;
     String _password;
     String _hostname;
-    bool _staticIPConfig;
+    bool _staticIPConfig = false;
 
     // for the mangement delay loop
-    unsigned long _lastConnectionAttempt;
+    unsigned long _lastConnectionAttempt = 0;
 
     // optional configuration for static IP address
     IPAddress _localIP;

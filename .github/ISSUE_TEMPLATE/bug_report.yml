@@ -1,0 +1,46 @@
+name: Bug report
+description: Report a reproducible SmartPod defect
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve SmartPod. Do not include credentials, tokens, or private network details. Report security issues using SECURITY.md.
+  - type: input
+    id: revision
+    attributes:
+      label: SmartPod revision
+      description: Commit SHA or branch you tested.
+      placeholder: 5c46a81
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: Hardware
+      description: Board, sensor variant, and relevant power/setup details.
+      placeholder: ESP-12E with ACS712_30A on an isolated bench load
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include expected behavior, actual behavior, and exact steps to reproduce.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output
+      description: Paste sanitized PlatformIO, serial, browser-console, or CI output.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I removed passwords, tokens, and private network details.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true

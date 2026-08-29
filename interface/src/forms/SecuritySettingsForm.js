@@ -31,8 +31,8 @@ const styles = theme => ({
 class SecuritySettingsForm extends React.Component {
 
   onSubmit = () => {
-    this.props.onSubmit();
-    this.props.authenticationContext.refresh();
+    return this.props.onSubmit()
+      .then(saved => saved && this.props.authenticationContext.refresh());
   }
 
   render() {

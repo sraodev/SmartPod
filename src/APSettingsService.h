@@ -37,15 +37,15 @@ class APSettingsService : public AdminSettingsService {
   private:
 
     // access point settings
-    uint8_t _provisionMode;
+    uint8_t _provisionMode = AP_MODE_ALWAYS;
     String _ssid;
     String _password;
 
     // for the mangement delay loop
-    unsigned long _lastManaged;
+    unsigned long _lastManaged = 0;
 
     // for the captive portal
-    DNSServer *_dnsServer;
+    DNSServer *_dnsServer = nullptr;
 
     void manageAP();
     void startAP();

@@ -26,7 +26,7 @@ const styles = theme => {
       textAlign: "center",
       padding: theme.spacing(2),
       paddingTop: "200px",
-      backgroundImage: 'url("/app/icon.png")',
+      backgroundImage: `url("${process.env.PUBLIC_URL || ''}/app/icon.png")`,
       backgroundRepeat: "no-repeat",
       backgroundPosition: "50% " + theme.spacing(2) + "px",
       backgroundSize: "auto 150px",

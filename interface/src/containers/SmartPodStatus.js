@@ -10,13 +10,11 @@ import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import ListItemText from "@material-ui/core/ListItemText";
 import Avatar from "@material-ui/core/Avatar";
 import Divider from "@material-ui/core/Divider";
-import DevicesIcon from "@material-ui/icons/Devices";
 import OfflineBoltIcon from "@material-ui/icons/OfflineBolt";
 import PowerIcon from "@material-ui/icons/Power";
 import ShowChartIcon from "@material-ui/icons/ShowChart";
 import DescriptionIcon from "@material-ui/icons/Description";
 import MonetizationOnIcon from "@material-ui/icons/MonetizationOn";
-import SdStorageIcon from "@material-ui/icons/SdStorage";
 import DataUsageIcon from "@material-ui/icons/DataUsage";
 
 import { SMARTPOD_STATUS_ENDPOINT } from "../constants/Endpoints";

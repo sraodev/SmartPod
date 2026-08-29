@@ -1,0 +1,36 @@
+name: Feature request
+description: Propose a focused improvement to SmartPod
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user or contributor problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Describe the smallest useful behavior change.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and trade-offs
+      description: Note any hardware, safety, compatibility, flash-size, or migration impact.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Firmware
+        - Dashboard
+        - Hardware and measurement
+        - Documentation
+        - Build and release
+        - Integration
+    validations:
+      required: true

@@ -60,7 +60,7 @@ export const restComponent = (endpointUrl, FormComponent) => {
 
       saveData(e) {
         this.setState({ fetched: false });
-        redirectingAuthorizedFetch(endpointUrl, {
+        return redirectingAuthorizedFetch(endpointUrl, {
           method: 'POST',
           body: JSON.stringify(this.state.data),
           headers: {
@@ -78,11 +78,13 @@ export const restComponent = (endpointUrl, FormComponent) => {
               variant: 'success',
             });
             this.setState({ data: json, fetched: true });
+            return true;
           }).catch(error => {
             this.props.enqueueSnackbar("Problem saving: " + error.message, {
               variant: 'error',
             });
-            this.setState({ data: null, fetched: true, errorMessage: error.message });
+            this.setState({ fetched: true, errorMessage: error.message });
+            return false;
           });
       }
 
