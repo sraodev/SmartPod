@@ -14,8 +14,8 @@ This roadmap starts with a safe simulator and earns its way toward controlled po
 ## 1. Contract-first simulator
 
 - [x] Publish the first draft of the port/session OpenAPI contract.
-- [ ] Implement a deterministic port and session state machine.
-- [ ] Implement immutable tariff snapshots using integer money and Wh values.
+- [x] Implement a deterministic port and session state machine in the browser simulator.
+- [x] Implement immutable tariff snapshots using integer money and milli-Wh accumulation.
 - [x] Add a browser simulator for readings, contactor feedback, disconnects, and faults.
 - [ ] Build the PWA screens for ports, live values, start/stop, estimates, and faults.
 - [ ] Test the entire flow without mains hardware or real payments.

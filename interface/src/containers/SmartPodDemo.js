@@ -26,10 +26,12 @@ import WarningIcon from '@material-ui/icons/Warning';
 
 import {
   DEFAULT_TARIFF,
+  SESSION_EVENT,
   SESSION_STATE,
   calculateCharge,
   formatDuration,
-  simulateTick
+  simulateTick,
+  transitionSession
 } from '../simulator/energySession';
 
 const styles = theme => ({
@@ -210,7 +212,7 @@ const createInitialState = () => ({
   voltageV: 230,
   currentA: 0,
   powerW: 0,
-  energyWh: 0,
+  energyMilliWh: 0,
   elapsedSeconds: 0,
   networkOnline: true,
   fault: null,
@@ -262,11 +264,11 @@ class SmartPodDemo extends Component {
 
   startSession = () => {
     this.setState(previous => ({
-      sessionState: SESSION_STATE.STARTING,
+      sessionState: transitionSession(previous.sessionState, SESSION_EVENT.START_REQUESTED),
       sessionStarted: true,
       currentA: 0,
       powerW: 0,
-      energyWh: 0,
+      energyMilliWh: 0,
       elapsedSeconds: 0,
       fault: null,
       samples: [0],
@@ -275,39 +277,40 @@ class SmartPodDemo extends Component {
     clearTimeout(this.transitionTimer);
     this.transitionTimer = setTimeout(() => {
       this.setState(previous => previous.sessionState === SESSION_STATE.STARTING
-        ? { sessionState: SESSION_STATE.ACTIVE }
+        ? { sessionState: transitionSession(previous.sessionState, SESSION_EVENT.OUTPUT_CONFIRMED) }
         : null);
     }, 650);
   };
 
   stopSession = () => {
-    this.setState({
-      sessionState: SESSION_STATE.STOPPING,
+    this.setState(previous => ({
+      sessionState: transitionSession(previous.sessionState, SESSION_EVENT.STOP_REQUESTED),
       currentA: 0,
       powerW: 0
-    });
+    }));
     clearTimeout(this.transitionTimer);
     this.transitionTimer = setTimeout(() => {
       this.setState(previous => previous.sessionState === SESSION_STATE.STOPPING
-        ? { sessionState: SESSION_STATE.COMPLETED }
+        ? { sessionState: transitionSession(previous.sessionState, SESSION_EVENT.OUTPUT_OPENED) }
         : null);
     }, 450);
   };
 
   simulateFault = () => {
     clearTimeout(this.transitionTimer);
-    this.setState({
-      sessionState: SESSION_STATE.FAULTED,
+    this.setState(previous => ({
+      sessionState: transitionSession(previous.sessionState, SESSION_EVENT.FAULT_DETECTED),
       currentA: 0,
       powerW: 0,
       fault: 'OVER_TEMPERATURE'
-    });
+    }));
   };
 
   resetSimulator = () => {
     clearTimeout(this.transitionTimer);
     this.setState(previous => ({
       ...createInitialState(),
+      sessionState: transitionSession(previous.sessionState, SESSION_EVENT.RESET),
       currentLimitA: previous.currentLimitA,
       voltageV: previous.voltageV,
       networkOnline: previous.networkOnline,
@@ -374,7 +377,7 @@ class SmartPodDemo extends Component {
       voltageV,
       currentA,
       powerW,
-      energyWh,
+      energyMilliWh,
       elapsedSeconds,
       networkOnline,
       fault,
@@ -382,8 +385,9 @@ class SmartPodDemo extends Component {
       draftTariff,
       activeTariff
     } = this.state;
+    const energyWh = energyMilliWh / 1000;
     const charge = calculateCharge({
-      energyWh,
+      energyMilliWh,
       activeSeconds: elapsedSeconds,
       tariff: activeTariff,
       sessionStarted
@@ -420,6 +424,7 @@ class SmartPodDemo extends Component {
               <Chip variant="outlined" label={networkOnline ? 'Gateway online' : 'Offline ledger active'} icon={!networkOnline ? <CloudOffIcon /> : undefined} />
               <Chip variant="outlined" label={active ? 'Contactor feedback: closed' : 'Contactor feedback: open'} />
               <Chip variant="outlined" label={sessionStarted ? 'Payment sandbox: authorized' : 'Payment: not requested'} />
+              <Chip variant="outlined" label={`Tariff snapshot: ${activeTariff.id} v${activeTariff.version}`} />
             </div>
           </section>
 
