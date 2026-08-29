@@ -36,9 +36,9 @@ class OTASettingsService : public AdminSettingsService {
 
   private:
 
-    ArduinoOTAClass *_arduinoOTA;
-    bool _enabled;
-    int _port;
+    ArduinoOTAClass *_arduinoOTA = nullptr;
+    bool _enabled = false;
+    int _port = DEFAULT_OTA_PORT;
     String _password;
 
     void configureArduinoOTA();

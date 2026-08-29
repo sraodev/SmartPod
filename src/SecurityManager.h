@@ -19,6 +19,7 @@ class User {
     String _password;
     bool _admin;
   public:
+    User(): _username(""), _password(""), _admin(false) {}
     User(String username, String password, bool admin): _username(username), _password(password), _admin(admin) {}
     String getUsername() {
       return _username;
@@ -33,16 +34,13 @@ class User {
 
 class Authentication {
   private:
-    User *_user;
+    User _user;
     boolean _authenticated;
   public:
-    Authentication(User& user): _user(new User(user)), _authenticated(true) {}
-    Authentication() : _user(nullptr), _authenticated(false) {}  
-    ~Authentication() {
-      delete(_user);   
-    }
+    Authentication(const User& user): _user(user), _authenticated(true) {}
+    Authentication() : _user(), _authenticated(false) {}
     User* getUser() {
-      return _user;
+      return _authenticated ? &_user : nullptr;
     }
     bool isAuthenticated() {
       return _authenticated;

@@ -87,6 +87,10 @@ void APSettingsService::readFromJsonObject(JsonObject &root)
   }
   _ssid = root["ssid"] | AP_DEFAULT_SSID;
   _password = root["password"] | AP_DEFAULT_PASSWORD;
+  if (_password.length() < 8 || _password.length() > 63)
+  {
+    _password = AP_DEFAULT_PASSWORD;
+  }
 }
 
 void APSettingsService::writeToJsonObject(JsonObject &root)

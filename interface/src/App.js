@@ -6,7 +6,6 @@ import { SnackbarProvider } from "notistack";
 
 import CssBaseline from "@material-ui/core/CssBaseline";
 import blueGrey from "@material-ui/core/colors/blueGrey";
-import indigo from "@material-ui/core/colors/indigo";
 import orange from "@material-ui/core/colors/orange";
 import red from "@material-ui/core/colors/red";
 import green from "@material-ui/core/colors/green";

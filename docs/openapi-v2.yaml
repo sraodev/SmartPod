@@ -1,0 +1,368 @@
+openapi: 3.1.0
+info:
+  title: SmartPod Gateway API
+  version: 0.1.0-draft
+  license:
+    name: GNU Lesser General Public License v3.0
+    url: https://www.gnu.org/licenses/lgpl-3.0.html
+  description: |
+    Draft hardware-neutral contract for SmartPod v2. Commands express intent;
+    responses and events report the controller's actual state.
+security:
+  - bearerAuth: []
+servers:
+  - url: https://{host}/api
+    description: SmartPod control plane or site gateway
+    variables:
+      host:
+        default: smartpod.local
+        description: Deployment-specific API host
+paths:
+  /v1/ports:
+    get:
+      operationId: listPorts
+      summary: List the ports visible to the caller
+      responses:
+        "200":
+          description: Available ports
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ports]
+                properties:
+                  ports:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Port"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /v1/ports/{portId}:
+    parameters:
+      - $ref: "#/components/parameters/PortId"
+    get:
+      operationId: getPort
+      summary: Get the current actual state of one port
+      responses:
+        "200":
+          description: Current actual port state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Port"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /v1/sessions:
+    post:
+      operationId: startSession
+      summary: Request an authorized session start
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [port_id, tariff_id]
+              properties:
+                port_id:
+                  type: string
+                tariff_id:
+                  type: string
+                payment_authorization_id:
+                  type: [string, "null"]
+                limits:
+                  $ref: "#/components/schemas/SessionLimits"
+      responses:
+        "202":
+          description: Start intent accepted; the controller may still reject it
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "409":
+          description: Port state or idempotency conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /v1/sessions/{sessionId}:
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getSession
+      summary: Get session state, metering, and charge details
+      responses:
+        "200":
+          description: Session state and authoritative running estimate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /v1/sessions/{sessionId}/stop:
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      operationId: stopSession
+      summary: Request a session stop
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      responses:
+        "202":
+          description: Stop intent accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /v1/events:
+    get:
+      operationId: streamEvents
+      summary: Stream port, session, meter, payment, and fault updates
+      responses:
+        "200":
+          description: Server-sent event stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    PortId:
+      name: portId
+      in: path
+      required: true
+      schema:
+        type: string
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 16
+        maxLength: 128
+  responses:
+    Unauthorized:
+      description: Authentication is missing or invalid
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    NotFound:
+      description: Resource not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+  schemas:
+    Port:
+      type: object
+      additionalProperties: false
+      required: [id, mode, state, actual_output, measurement, faults, updated_at]
+      properties:
+        id:
+          type: string
+        mode:
+          type: string
+          enum: [simulator, smart-power, ac-evse]
+        state:
+          type: string
+          enum: [unavailable, available, authorizing, preparing, energizing, active, stopping, faulted]
+        actual_output:
+          type: string
+          enum: [open, closed, unknown]
+        measurement:
+          $ref: "#/components/schemas/Measurement"
+        faults:
+          type: array
+          items:
+            $ref: "#/components/schemas/Fault"
+        active_session_id:
+          type: [string, "null"]
+        updated_at:
+          type: string
+          format: date-time
+    Measurement:
+      type: object
+      additionalProperties: false
+      required: [sequence, voltage_mv, current_ma, active_power_w, energy_wh, quality, sampled_at]
+      properties:
+        sequence:
+          type: integer
+          minimum: 0
+        voltage_mv:
+          type: integer
+          minimum: 0
+        current_ma:
+          type: integer
+          minimum: 0
+        active_power_w:
+          type: integer
+        energy_wh:
+          type: integer
+          minimum: 0
+        quality:
+          type: string
+          enum: [measured, estimated, stale, invalid]
+        sampled_at:
+          type: string
+          format: date-time
+    Session:
+      type: object
+      additionalProperties: false
+      required: [id, port_id, state, tariff, start_energy_wh, charge, created_at]
+      properties:
+        id:
+          type: string
+        port_id:
+          type: string
+        state:
+          type: string
+          enum: [authorizing, preparing, energizing, active, stopping, completed, settled, failed]
+        tariff:
+          $ref: "#/components/schemas/TariffSnapshot"
+        limits:
+          $ref: "#/components/schemas/SessionLimits"
+        start_energy_wh:
+          type: integer
+          minimum: 0
+        end_energy_wh:
+          type: [integer, "null"]
+          minimum: 0
+        charge:
+          $ref: "#/components/schemas/ChargeBreakdown"
+        payment_state:
+          type: string
+          enum: [not_required, pending, authorized, captured, failed, refunded]
+        stop_reason:
+          type: [string, "null"]
+        created_at:
+          type: string
+          format: date-time
+        started_at:
+          type: [string, "null"]
+          format: date-time
+        ended_at:
+          type: [string, "null"]
+          format: date-time
+    SessionLimits:
+      type: [object, "null"]
+      additionalProperties: false
+      properties:
+        max_energy_wh:
+          type: integer
+          exclusiveMinimum: 0
+        max_duration_seconds:
+          type: integer
+          exclusiveMinimum: 0
+        max_amount_minor:
+          type: integer
+          exclusiveMinimum: 0
+    TariffSnapshot:
+      type: object
+      additionalProperties: false
+      required: [id, version, currency, fixed_minor, energy_per_kwh_minor, tax_basis_points]
+      properties:
+        id:
+          type: string
+        version:
+          type: integer
+          minimum: 1
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+        fixed_minor:
+          type: integer
+          minimum: 0
+        energy_per_kwh_minor:
+          type: integer
+          minimum: 0
+        time_per_minute_minor:
+          type: integer
+          minimum: 0
+          default: 0
+        idle_per_minute_minor:
+          type: integer
+          minimum: 0
+          default: 0
+        tax_basis_points:
+          type: integer
+          minimum: 0
+    ChargeBreakdown:
+      type: object
+      additionalProperties: false
+      required: [currency, fixed_minor, energy_minor, time_minor, idle_minor, tax_minor, total_minor, estimated]
+      properties:
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+        fixed_minor:
+          type: integer
+        energy_minor:
+          type: integer
+        time_minor:
+          type: integer
+        idle_minor:
+          type: integer
+        tax_minor:
+          type: integer
+        total_minor:
+          type: integer
+        estimated:
+          type: boolean
+    Fault:
+      type: object
+      additionalProperties: false
+      required: [code, severity, latched, occurred_at]
+      properties:
+        code:
+          type: string
+        severity:
+          type: string
+          enum: [warning, stop, lockout]
+        latched:
+          type: boolean
+        occurred_at:
+          type: string
+          format: date-time
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string

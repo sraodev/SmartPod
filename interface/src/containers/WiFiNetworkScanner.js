@@ -16,6 +16,8 @@ class WiFiNetworkScanner extends Component {
   constructor(props) {
     super(props);
     this.pollCount = 0;
+    this.pollTimeout = undefined;
+    this.mounted = false;
     this.state = {
       scanningForNetworks: true,
       errorMessage: null,
@@ -26,7 +28,13 @@ class WiFiNetworkScanner extends Component {
   }
 
   componentDidMount() {
+    this.mounted = true;
     this.scanNetworks();
+  }
+
+  componentWillUnmount() {
+    this.mounted = false;
+    clearTimeout(this.pollTimeout);
   }
 
   requestNetworkScan() {
@@ -46,6 +54,9 @@ class WiFiNetworkScanner extends Component {
       }
       throw Error("Scanning for networks returned unexpected response code: " + response.status);
     }).catch(error => {
+      if (!this.mounted) {
+        return;
+      }
       this.props.enqueueSnackbar("Problem scanning: " + error.message, {
         variant: 'error',
       });
@@ -54,7 +65,9 @@ class WiFiNetworkScanner extends Component {
   }
 
   schedulePollTimeout() {
-    setTimeout(this.pollNetworkList, POLLING_FREQUENCY);
+    if (this.mounted) {
+      this.pollTimeout = setTimeout(this.pollNetworkList, POLLING_FREQUENCY);
+    }
   }
 
   retryError() {
@@ -89,11 +102,14 @@ class WiFiNetworkScanner extends Component {
         throw Error("Device returned unexpected response code: " + response.status);
       })
       .then(json => {
+        if (!this.mounted) {
+          return;
+        }
         json.networks.sort(this.compareNetworks)
         this.setState({ scanningForNetworks: false, networkList: json, errorMessage: null })
       })
       .catch(error => {
-        if (error.name !== RETRY_EXCEPTION_TYPE) {
+        if (this.mounted && error.name !== RETRY_EXCEPTION_TYPE) {
           this.props.enqueueSnackbar("Problem scanning: " + error.message, {
             variant: 'error',
           });

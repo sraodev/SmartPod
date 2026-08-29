@@ -64,7 +64,10 @@ protected:
     if (jsonDocument.is<JsonObject>()){
       JsonObject newConfig = jsonDocument.as<JsonObject>();
       readFromJsonObject(newConfig);
-      writeToFS();
+      if (!writeToFS()) {
+        request->send(500);
+        return;
+      }
 
       // write settings back with a callback to reconfigure the wifi
       AsyncJsonCallbackResponse * response = new AsyncJsonCallbackResponse([this] () {onConfigUpdated();}, MAX_SETTINGS_SIZE);
