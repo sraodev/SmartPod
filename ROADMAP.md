@@ -2,6 +2,8 @@
 
 This roadmap starts with a safe simulator and earns its way toward controlled power. The detailed boundaries and acceptance gates are in [docs/architecture-v2.md](docs/architecture-v2.md).
 
+Implementation tasks, dependencies, milestone links, and contributor ownership are tracked in [enhancement tracker #12](https://github.com/sraodev/SmartPod/issues/12). This includes the future CLI, optional terminal banner, and [GitHub-only installer](docs/cli-installation.md); installer availability does not mean CLI binaries or hardware support have shipped.
+
 ## 0. Stabilize the legacy prototype
 
 - [x] Restore reproducible ESP8266, dashboard, and filesystem builds.
