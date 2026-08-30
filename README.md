@@ -111,6 +111,18 @@ The current firmware defaults to an ESP-12E and analog pin `A0`. Cheap sensor mo
 
 ## Quick start
 
+### Future CLI installer (GitHub-only)
+
+The repository includes a [checksum-verifying CLI installer](install.sh). **CLI binaries are not published yet**: the existing ESP8266 preview contains firmware, not a CLI. The installer fails clearly until a compatible CLI release exists; use the browser demo or source-build steps below today.
+
+Once CLI release assets are published:
+
+```sh
+curl --proto '=https' --tlsv1.2 -fsSL https://raw.githubusercontent.com/sraodev/SmartPod/master/install.sh | sh
+```
+
+The script comes from this repository and binaries/checksums come from GitHub Releases. No Cloudflare, external install service, sudo, or automatic shell-profile changes. See [installation options and release requirements](docs/cli-installation.md). CLI work, the terminal banner, and other enhancements are linked in [the enhancement tracker](https://github.com/sraodev/SmartPod/issues/12).
+
 ### Prerequisites
 
 - [Git](https://git-scm.com/)

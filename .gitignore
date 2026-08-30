@@ -8,3 +8,4 @@
 /interface/build
 /interface/node_modules
 .vscode
+__pycache__/
