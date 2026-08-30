@@ -89,6 +89,8 @@ Security notes:
 
 See [ROADMAP.md](ROADMAP.md) for the focused path forward and [SECURITY.md](SECURITY.md) for responsible reporting.
 
+Firmware diagnostics use [structured serial logging](docs/logging.md): JSON by default, configurable severity, bounded records, and an optional human-readable format. Application logs exclude Wi-Fi names, addresses, credentials, tokens, and request bodies. No cloud log collection is added.
+
 ## SmartPod v2 direction
 
 The next version is designed as an open, hardware-adaptable energy-control platform rather than a larger ESP demo. A real-time MCU controller owns metering, interlocks, and actual output state; an optional Raspberry Pi/Linux gateway owns offline operation and hardware adapters; the app/control plane owns users, tariffs, session history, and payment-provider integrations.

@@ -1,4 +1,5 @@
 #include <WiFiStatus.h>
+#include <FirmwareLog.h>
 
 WiFiStatus::WiFiStatus(AsyncWebServer *server, SecurityManager* securityManager) : _server(server), _securityManager(securityManager) {
   _server->on(WIFI_STATUS_SERVICE_PATH, HTTP_GET, 
@@ -17,36 +18,27 @@ WiFiStatus::WiFiStatus(AsyncWebServer *server, SecurityManager* securityManager)
 
 #if defined(ESP8266)
 void WiFiStatus::onStationModeConnected(const WiFiEventStationModeConnected& event) {
-  Serial.print("WiFi Connected. SSID=");
-  Serial.println(event.ssid);
+  smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "wifi", "connected");
 }
 
 void WiFiStatus::onStationModeDisconnected(const WiFiEventStationModeDisconnected& event) {
-  Serial.print("WiFi Disconnected. Reason code=");
-  Serial.println(event.reason);
+  smartpod_logging::logger().write(smartpod_logging::LogLevel::Warn, "wifi", "disconnected", smartpod_logging::LogField::Code, event.reason);
 }
 
 void WiFiStatus::onStationModeGotIP(const WiFiEventStationModeGotIP& event) {
-  Serial.print("WiFi Got IP. localIP=");
-  Serial.print(event.ip);
-  Serial.print(", hostName=");
-  Serial.println(WiFi.hostname());
+  smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "wifi", "address acquired");
 }
 #elif defined(ESP_PLATFORM)
 void WiFiStatus::onStationModeConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("WiFi Connected.");
+  smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "wifi", "connected");
 }
 
 void WiFiStatus::onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.print("WiFi Disconnected. Reason code=");
-  Serial.println(info.disconnected.reason);
+  smartpod_logging::logger().write(smartpod_logging::LogLevel::Warn, "wifi", "disconnected", smartpod_logging::LogField::Code, info.disconnected.reason);
 }
 
 void WiFiStatus::onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.print("WiFi Got IP. localIP=");
-  Serial.print(WiFi.localIP().toString());
-  Serial.print(", hostName=");
-  Serial.println(WiFi.getHostname());
+  smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "wifi", "address acquired");
 }
 #endif
 

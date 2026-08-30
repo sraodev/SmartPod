@@ -1,4 +1,5 @@
 #include <OTASettingsService.h>
+#include <FirmwareLog.h>
 
 OTASettingsService::OTASettingsService(AsyncWebServer* server, FS* fs, SecurityManager* securityManager) : AdminSettingsService(server, fs, securityManager, OTA_SETTINGS_SERVICE_PATH, OTA_SETTINGS_FILE) {
 #if defined(ESP8266)
@@ -46,26 +47,23 @@ void OTASettingsService::configureArduinoOTA() {
     _arduinoOTA = nullptr;
   }
   if (_enabled) {
-    Serial.println("Starting OTA Update Service");
+    smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "ota", "starting update service");
     _arduinoOTA = new ArduinoOTAClass;
     _arduinoOTA->setPort(_port);
     _arduinoOTA->setPassword(_password.c_str());
     _arduinoOTA->onStart([]() {
-      Serial.println("Starting");
+      smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "ota", "update started");
     });
     _arduinoOTA->onEnd([]() {
-      Serial.println("\nEnd");
+      smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "ota", "update completed");
     });
     _arduinoOTA->onProgress([](unsigned int progress, unsigned int total) {
-      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+      const uint32_t percent = total == 0 ? 0 : static_cast<uint32_t>(
+        (static_cast<uint64_t>(progress > total ? total : progress) * 100) / total);
+      smartpod_logging::logger().write(smartpod_logging::LogLevel::Debug, "ota", "update progress", smartpod_logging::LogField::ProgressPercent, percent);
     });
     _arduinoOTA->onError([](ota_error_t error) {
-      Serial.printf("Error[%u]: ", error);
-      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-      else if (error == OTA_END_ERROR) Serial.println("End Failed");
+      smartpod_logging::logger().write(smartpod_logging::LogLevel::Error, "ota", "update failed", smartpod_logging::LogField::Code, error);
     });
     _arduinoOTA->begin();
   }

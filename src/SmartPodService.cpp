@@ -7,6 +7,7 @@
  */
 
 #include <SmartPodService.h>
+#include <FirmwareLog.h>
 
 std::map<std::string, ACS712_type> ACS712Type = {
     {"ACS712_05B", ACS712_type::ACS712_05B},
@@ -37,10 +38,8 @@ SmartPodService::~SmartPodService() {}
  */
 void SmartPodService::begin()
 {
-  Serial.print("[SmartPod] Setting Smartpod Service... \t\t\t");
   SettingsService::begin();
-  Serial.println("[Done]");
-  Serial.print("[SmartPod] Starting Smartpod Service...\t\t\t");
+  smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "sensor", "initializing");
   //_acs712 = new ACS712(_sensor_type, _sensor_pin);
   _acs712 = new ACS712(_sensor_type, A0);
 
@@ -48,16 +47,14 @@ void SmartPodService::begin()
   // It is not necessary, but may positively affect the accuracy
   // Ensure that no current flows through the sensor at this moment
   // If you are not sure that the current through the sensor will not leak during calibration - comment out this method
-  //Serial.print("[SmartPod] Calibrating smartpod sensor.. Ensure that no current flows through the sensor at this moment: ");
+  smartpod_logging::logger().write(smartpod_logging::LogLevel::Warn, "sensor", "calibration requires zero current");
   _acs712->calibrate();
-  //Serial.println("Done!");
   getSmartPodSensor(&_sp_sensor);
-  Serial.println("[Done]");
+  smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "sensor", "initialized");
 }
 
 void SmartPodService::loop()
 {
-  //Serial.print("[SmartPod] Running smartpod service...");
   getSmartPodEvent(&_sp_sensor_event);
 }
 
@@ -255,20 +252,4 @@ void SmartPodService::writeToJsonObject(JsonObject &root)
 
 void SmartPodService::onConfigUpdated()
 {
-}
-
-void SmartPodService::spinWheel()
-{
-  delay(1);
-  Serial.print("\b\\");
-  Serial.flush();
-  delay(1);
-  Serial.print("\b|");
-  Serial.flush();
-  delay(1);
-  Serial.print("\b/");
-  Serial.flush();
-  delay(1);
-  Serial.print("\b-");
-  Serial.flush();
 }

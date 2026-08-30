@@ -81,7 +81,6 @@ private:
 
 	void setName(sensor_t *sensor);
 	void setMinDelay(sensor_t *sensor);
-	void spinWheel();
 };
 
 #endif /* SMARTPODSERVICE_H */
