@@ -1,6 +1,6 @@
 # Structured firmware logging
 
-SmartPod adapts Braid's logger design principles: structured records, severity filtering, component context, and constructor-injected output/clock for tests. It does **not** import Braid's Go logger or add a gateway, file collector, remote telemetry, or new dependency.
+SmartPod's firmware logger provides structured records, severity filtering, component context, and constructor-injected output/clock for tests. It adds no gateway, file collector, remote telemetry, or new dependency.
 
 ## Output
 
