@@ -15,6 +15,7 @@
 #include <ArduinoJson.h>
 #include <AsyncJsonWebHandler.h>
 #include <AsyncArduinoJson6.h>
+#include <FirmwareLog.h>
 
 
 /*
@@ -65,6 +66,7 @@ protected:
       JsonObject newConfig = jsonDocument.as<JsonObject>();
       readFromJsonObject(newConfig);
       if (!writeToFS()) {
+        smartpod_logging::logger().write(smartpod_logging::LogLevel::Error, "settings", "persistence failed");
         request->send(500);
         return;
       }

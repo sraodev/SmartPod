@@ -1,4 +1,5 @@
 #include <NTPSettingsService.h>
+#include <FirmwareLog.h>
 
 NTPSettingsService::NTPSettingsService(AsyncWebServer* server, FS* fs, SecurityManager* securityManager) : AdminSettingsService(server, fs, securityManager, NTP_SETTINGS_SERVICE_PATH, NTP_SETTINGS_FILE) {
 
@@ -64,30 +65,30 @@ void NTPSettingsService::onConfigUpdated() {
 
 #if defined(ESP8266)
 void NTPSettingsService::onStationModeGotIP(const WiFiEventStationModeGotIP& event) {
-  Serial.printf("Got IP address, starting NTP Synchronization\n");
+  smartpod_logging::logger().write(smartpod_logging::LogLevel::Debug, "ntp", "synchronization scheduled");
   _reconfigureNTP = true;
 }
 
 void NTPSettingsService::onStationModeDisconnected(const WiFiEventStationModeDisconnected& event) {
-  Serial.printf("WiFi connection dropped, stopping NTP.\n");
+  smartpod_logging::logger().write(smartpod_logging::LogLevel::Debug, "ntp", "stopped after disconnect");
   _reconfigureNTP = false;
   NTP.stop();
 }
 #elif defined(ESP_PLATFORM)
 void NTPSettingsService::onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.printf("Got IP address, starting NTP Synchronization\n");
+  smartpod_logging::logger().write(smartpod_logging::LogLevel::Debug, "ntp", "synchronization scheduled");
   _reconfigureNTP = true;
 }
 
 void NTPSettingsService::onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.printf("WiFi connection dropped, stopping NTP.\n");
+  smartpod_logging::logger().write(smartpod_logging::LogLevel::Debug, "ntp", "stopped after disconnect");
   _reconfigureNTP = false;
   NTP.stop();
 }
 #endif
 
 void NTPSettingsService::configureNTP() {
-  Serial.println("Configuring NTP...");
+  smartpod_logging::logger().write(smartpod_logging::LogLevel::Debug, "ntp", "configuring synchronization");
 
   // disable sync
   NTP.stop();
@@ -99,13 +100,13 @@ void NTPSettingsService::configureNTP() {
 
 void NTPSettingsService::processSyncEvent(NTPSyncEvent_t ntpEvent) {
     if (ntpEvent) {
-        Serial.print ("Time Sync error: ");
         if (ntpEvent == noResponse)
-            Serial.println ("NTP server not reachable");
+            smartpod_logging::logger().write(smartpod_logging::LogLevel::Warn, "ntp", "server unreachable");
         else if (ntpEvent == invalidAddress)
-            Serial.println ("Invalid NTP server address");
+            smartpod_logging::logger().write(smartpod_logging::LogLevel::Warn, "ntp", "invalid server address");
+        else
+            smartpod_logging::logger().write(smartpod_logging::LogLevel::Warn, "ntp", "synchronization failed", smartpod_logging::LogField::Code, ntpEvent);
     } else {
-        Serial.print ("Got NTP time: ");
-        Serial.println (NTP.getTimeDateString (NTP.getLastNTPSync ()));
+        smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "ntp", "synchronized");
     }
 }

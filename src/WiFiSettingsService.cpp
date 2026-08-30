@@ -1,4 +1,5 @@
 #include <WiFiSettingsService.h>
+#include <FirmwareLog.h>
 
 WiFiSettingsService::WiFiSettingsService(AsyncWebServer* server, FS* fs, SecurityManager* securityManager) : AdminSettingsService(server, fs, securityManager, WIFI_SETTINGS_SERVICE_PATH, WIFI_SETTINGS_FILE) {
 #if defined(ESP8266)
@@ -96,7 +97,7 @@ void WiFiSettingsService::manageSTA() {
   }
   // Connect or reconnect as required
   if ((WiFi.getMode() & WIFI_STA) == 0) {
-    Serial.println("Connecting to WiFi.");    
+    smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "wifi", "connecting");
     if (_staticIPConfig) {
       // configure for static IP
       WiFi.config(_localIP, _gatewayIP,  _subnetMask, _dnsIP1, _dnsIP2);
@@ -124,4 +125,3 @@ void WiFiSettingsService::onStationModeDisconnected(WiFiEvent_t event, WiFiEvent
   WiFi.disconnect(true);
 }
 #endif
-

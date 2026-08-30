@@ -3,6 +3,7 @@
 
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
+#include <FirmwareLog.h>
 
 #define ASYNC_JSON_REQUEST_DEFAULT_MAX_SIZE 1024
 #define ASYNC_JSON_REQUEST_MIMETYPE "application/json"
@@ -62,8 +63,7 @@ class AsyncJsonWebHandler: public AsyncWebHandler {
     virtual void handleRequest(AsyncWebServerRequest *request) override final {
       // no request configured
       if(!_onRequest) {
-        Serial.print("No request callback was configured for endpoint: ");
-        Serial.println(_uri);           
+        smartpod_logging::logger().write(smartpod_logging::LogLevel::Error, "http", "request callback missing");
         request->send(500);
         return;
       }

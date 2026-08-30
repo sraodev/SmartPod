@@ -1,4 +1,5 @@
 #include <APSettingsService.h>
+#include <FirmwareLog.h>
 
 APSettingsService::APSettingsService(AsyncWebServer *server, FS *fs, SecurityManager *securityManager) : AdminSettingsService(server, fs, securityManager, AP_SETTINGS_SERVICE_PATH, AP_SETTINGS_FILE)
 {
@@ -40,13 +41,12 @@ void APSettingsService::manageAP()
 
 void APSettingsService::startAP()
 {
-  Serial.println("[SmartPod] Starting SmartPod access point");
+  smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "ap", "starting access point");
   WiFi.softAP(_ssid.c_str(), _password.c_str());
   if (!_dnsServer)
   {
     IPAddress apIp = WiFi.softAPIP();
-    Serial.print("[SmartPod] Starting captive portal on ");
-    Serial.println(apIp);
+    smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "ap", "starting captive portal");
     _dnsServer = new DNSServer;
     _dnsServer->start(DNS_PORT, "*", apIp);
   }
@@ -56,12 +56,12 @@ void APSettingsService::stopAP()
 {
   if (_dnsServer)
   {
-    Serial.println("[SmartPod] Stopping captive portal");
+    smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "ap", "stopping captive portal");
     _dnsServer->stop();
     delete _dnsServer;
     _dnsServer = nullptr;
   }
-  Serial.println("[SmartPod] Stopping SmartPod access point");
+  smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "ap", "stopping access point");
   WiFi.softAPdisconnect(true);
 }
 

@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "SmartPod.h"
+#include <FirmwareLog.h>
 
 SmartPod::SmartPod()
 {
@@ -28,6 +29,8 @@ void SmartPod::begin()
 
     // Serial port for debugging purposes
     Serial.begin(SERIAL_BAUD_RATE);
+    smartpod_logging::beginLogging();
+    smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "system", "booting");
 
     connectToWiFi();
     mountSPIFFS();
@@ -36,26 +39,23 @@ void SmartPod::begin()
     _securitySettingsService->begin();
 
     // Start services
-    Serial.print("[SmartPod] Starting NTP Service...\t\t\t");
     _ntpSettingsService->begin();
-    Serial.println("[Done]");
+    smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "ntp", "settings loaded");
 
-    Serial.print("[SmartPod] Starting OTA Service...\t\t\t");
     _otaSettingsService->begin();
-    Serial.println("[Done]");
+    smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "ota", "settings loaded");
 
-    Serial.print("[SmartPod] Starting AP Service...\t\t\t");
     _apSettingsService->begin();
-    Serial.println("[Done]");
+    smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "ap", "settings loaded");
 
-    Serial.print("[SmartPod] Starting WiFi Service...\t\t\t");
     _wifiSettingsService->begin();
-    Serial.println("[Done]");
+    smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "wifi", "settings loaded");
 
     setServerStaticResource(_server);
 
     // Start server
     _server->begin();
+    smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "http", "server started");
     _smartpodService->begin();
 }
 
@@ -77,14 +77,13 @@ void SmartPod::connectToWiFi()
  */
 void SmartPod::mountSPIFFS()
 {
-    Serial.println("[SmartPod] Starting SPIFFS Service...");
-    Serial.print("[SmartPod] Mounting SPIFFS file system...\t\t\t");
+    smartpod_logging::logger().write(smartpod_logging::LogLevel::Debug, "storage", "mounting filesystem");
     if (!SPIFFS.begin())
     {
-        Serial.println("An Error has occurred while mounting SPIFFS");
+        smartpod_logging::logger().write(smartpod_logging::LogLevel::Error, "storage", "filesystem mount failed");
         return;
     }
-    Serial.println("[Done]");
+    smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "storage", "filesystem mounted");
 }
 
 void SmartPod::setServerStaticResource(AsyncWebServer *server)
