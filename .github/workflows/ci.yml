@@ -48,13 +48,13 @@ jobs:
           go-version: "1.25.x"
           cache-dependency-path: gateway/go.sum
 
-      - name: Test read-only gateway
+      - name: Test read-only gateway and CLI
         working-directory: gateway
         run: |
           go test -race ./...
           go vet ./...
 
-      - name: Verify actual gateway responses and restart
+      - name: Verify CLI commands, gateway responses, and restart
         run: node scripts/test-gateway-contract.cjs
 
       - name: Cross-build Linux gateway (not Raspberry Pi runtime validation)

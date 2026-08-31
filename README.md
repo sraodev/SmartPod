@@ -105,8 +105,9 @@ Read the full [SmartPod v2 architecture and phased delivery plan](docs/architect
 
 The [local Go/SQLite gateway preview](docs/gateway.md) now provides authenticated,
 read-only port endpoints with persistent synthetic readings. It runs on loopback
-only and has no hardware control, payments, or browser integration. Build it from
-source; the separate CLI and release installer assets are still future work.
+only and has no hardware control, payments, or browser integration. The
+[read-only CLI](docs/cli.md) adds status, port list/detail, help/version, and stable
+JSON output. Build both from source; CLI release installer assets are not published.
 
 ## Hardware
 
@@ -122,9 +123,24 @@ The current firmware defaults to an ESP-12E and analog pin `A0`. Cheap sensor mo
 
 ## Quick start
 
+### Read-only CLI (source build)
+
+With Go 1.25+, build the CLI without any hardware:
+
+```sh
+cd gateway
+go build -o build/smartpod ./cmd/smartpod
+./build/smartpod help
+./build/smartpod --version
+```
+
+Follow the [gateway + CLI quickstart](docs/cli.md) for authenticated `status`,
+`ports`, and `--json` reads. Simulator values are synthetic, not physical output
+feedback or billable energy; no control or payment commands are available.
+
 ### Future CLI installer (GitHub-only)
 
-The repository includes a [checksum-verifying CLI installer](install.sh). **CLI binaries are not published yet**: the existing ESP8266 preview contains firmware, not a CLI. The installer fails clearly until a compatible CLI release exists; use the browser demo or source-build steps below today.
+The repository includes a [checksum-verifying CLI installer](install.sh). **CLI binaries are not published yet**: the existing ESP8266 preview contains firmware, not a CLI. The installer fails clearly until a compatible CLI release exists; use the browser demo or the source-build quickstarts today.
 
 Once CLI release assets are published:
 
