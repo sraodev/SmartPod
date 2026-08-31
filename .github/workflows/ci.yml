@@ -42,6 +42,27 @@ jobs:
       - name: Validate gateway contract and examples
         run: npx --yes @redocly/cli@2.49.0 lint docs/openapi-v2.yaml
 
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.25.x"
+          cache-dependency-path: gateway/go.sum
+
+      - name: Test read-only gateway
+        working-directory: gateway
+        run: |
+          go test -race ./...
+          go vet ./...
+
+      - name: Verify actual gateway responses and restart
+        run: node scripts/test-gateway-contract.cjs
+
+      - name: Cross-build Linux gateway (not Raspberry Pi runtime validation)
+        working-directory: gateway
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -o build/smartpod-gateway-linux-amd64 .
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -o build/smartpod-gateway-linux-arm64 .
+
       - name: Build dashboard
         working-directory: interface
         run: npm run build
