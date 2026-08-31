@@ -40,7 +40,7 @@ curl --proto '=https' --tlsv1.2 -fsSL \
 - `SMARTPOD_INSTALL_DIR`: absolute user-owned destination directory; paths containing spaces are supported.
 - `sh install.sh --help`: display usage without downloading or installing anything.
 
-Pinning the binary tag does not pin the installer fetched from `master`. For an immutable installer source, replace `master` in the raw URL with a reviewed full commit SHA that contains `install.sh`, and select the release tag explicitly. Release tags/assets must not be overwritten. A checksum fetched from the same release detects corruption/mismatched bytes, **not a compromised publisher**; signed provenance and independent verification remain tracked in #21.
+Pinning the binary tag does not pin the installer fetched from `master`. For an immutable installer source, replace `master` in the raw URL with a reviewed full commit SHA that contains `install.sh`, and select the release tag explicitly. Release tags/assets must not be overwritten. A checksum fetched from the same release detects corruption/mismatched bytes, **not a compromised publisher**. The [firmware preview provenance workflow](releases.md) now documents independent verification; extending it to future CLI assets remains part of CLI release delivery, not a capability of this installer.
 
 ## Release asset contract
 
