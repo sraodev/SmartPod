@@ -1,0 +1,15 @@
+[
+  { "sessionState": "available", "actualOutput": "unknown", "port_state": "unavailable", "session_state": null },
+  { "sessionState": "available", "actualOutput": "open", "port_state": "available", "session_state": null },
+  { "sessionState": "starting", "actualOutput": "unknown", "port_state": "energizing", "session_state": "energizing" },
+  { "sessionState": "active", "actualOutput": "closed", "port_state": "active", "session_state": "active" },
+  { "sessionState": "active", "actualOutput": "unknown", "port_state": "active", "session_state": "active" },
+  { "sessionState": "stopping", "actualOutput": "closed", "port_state": "stopping", "session_state": "stopping" },
+  { "sessionState": "stopping", "actualOutput": "unknown", "port_state": "stopping", "session_state": "stopping" },
+  { "sessionState": "completed", "actualOutput": "open", "port_state": "available", "session_state": "completed" },
+  { "sessionState": "completed", "actualOutput": "unknown", "port_state": "unavailable", "session_state": "completed" },
+  { "sessionState": "completed", "actualOutput": "closed", "port_state": "unavailable", "session_state": "completed" },
+  { "sessionState": "faulted", "actualOutput": "open", "port_state": "faulted", "session_state": "failed" },
+  { "sessionState": "faulted", "actualOutput": "unknown", "port_state": "faulted", "session_state": "failed" },
+  { "sessionState": "faulted", "actualOutput": "closed", "port_state": "faulted", "session_state": "failed" }
+]

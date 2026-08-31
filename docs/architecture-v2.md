@@ -86,6 +86,11 @@ ACS712 is suitable for learning and rough current sensing, not automatic paid bi
 
 The meter or controller reports integer values (`mV`, `mA`, `W`, `Wh`) plus a monotonic sequence number. The gateway never reconstructs billable energy by adding rounded UI samples.
 
+The current browser lab instead accumulates session-relative integer milli-Wh. Its
+[simulator contract boundary](simulator-contract.md) preserves that source and remainder
+when projecting whole Wh, and defines the simplified state mapping. These local estimates
+are not authoritative meter readings or gateway charges.
+
 ### Switching and EV charging
 
 Use a contactor and protection chain rated for the continuous load, installation, fault current, enclosure, and local code. An EVSE adapter additionally needs pilot/proximity handling and the applicable residual-current, grounding, thermal, contactor, and fault logic. Reusing a proven open EVSE controller is the preferred first adapter; designing a new high-voltage EVSE PCB is a separate certification project.
