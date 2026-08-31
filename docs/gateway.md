@@ -39,6 +39,10 @@ drain (up to five seconds), then SQLite closes. Restart with the same database
 filename to resume the persisted sequence and energy, not a new seed. The token
 may be changed on restart; no token/session credentials are persisted.
 
+For scriptable reads without curl headers, build the [read-only SmartPod CLI](cli.md).
+It uses the same token environment variable and supports status, port list/detail,
+and schema-versioned JSON. It cannot write outputs or payments.
+
 ## API and security boundary
 
 Paths and schemas are in [openapi-v2.yaml](openapi-v2.yaml). Requests require the
@@ -128,8 +132,9 @@ npm --prefix interface ci
 node scripts/test-gateway-contract.cjs
 ```
 
-The last check builds and starts a real local process, checks authenticated reads
-and error responses against OpenAPI via the existing validator, verifies SIGTERM
+The last check builds both gateway and CLI, verifies CLI reads against a real local
+process, checks authenticated reads and error responses against OpenAPI via the
+existing validator, verifies SIGTERM
 and restart continuity, and checks token-free logs. Go tests additionally cover
 ordered history/remainders, migration/restart, corrupt and locked storage,
 runtime write failures, auth, Host/origin rejection, and read-only routing.
@@ -137,4 +142,4 @@ runtime write failures, auth, Host/origin rejection, and read-only routing.
 CI requires these checks and Linux amd64/arm64 cross-builds. Cross-compilation is
 **not Raspberry Pi runtime validation**. No hardware, real meter, load switching,
 revenue-grade billing, or payment validation was performed. The gateway binary is
-not the future `smartpod` CLI and must not be packaged as an installer CLI asset.
+not the `smartpod` CLI and must not be packaged as an installer CLI asset.

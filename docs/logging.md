@@ -57,4 +57,4 @@ platformio run -e esp12e
 
 The host suite compiles the real logger with warnings treated as errors and validates JSON, text, every severity threshold, instance isolation, escaping, truncation, maximum-size records, clock rollover, null dependencies, pre-serial suppression, configuration validation, and fixed-message call sites. It uses only a tiny serial/clock fake, not a fake firmware build. CI also builds the actual ESP8266 firmware.
 
-Physical serial timing, OTA traffic under load, and bench behavior are not hardware-verified by these tests. Firmware authentication/HTTP limitations and all existing mains-safety restrictions remain unchanged. Go gateway/CLI logging should be implemented with those components when they exist, rather than adding unused logging infrastructure now.
+Physical serial timing, OTA traffic under load, and bench behavior are not hardware-verified by these tests. Firmware authentication/HTTP limitations and all existing mains-safety restrictions remain unchanged. The [Go gateway](gateway.md) has its own structured lifecycle logs; the [CLI](cli.md) keeps diagnostics on stderr and scriptable JSON on stdout.

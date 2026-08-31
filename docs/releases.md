@@ -1,7 +1,7 @@
 # Auditable firmware previews
 
 This automation packages the legacy ESP8266 **firmware and device filesystem**, not
-the gateway or future CLI. It does not certify hardware, validate physical flashing
+the gateway or CLI. It does not certify hardware, validate physical flashing
 or OTA, establish safe mains operation, or authorize real-money billing. Legacy
 HTTP, public demo credentials/secrets, and non-expiring-token limitations remain.
 See [SECURITY.md](../SECURITY.md) and the [preview notes](preview-release-notes.md).
