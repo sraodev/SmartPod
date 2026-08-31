@@ -1,0 +1,111 @@
+name: Preview release verification
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*-preview.*']
+    paths:
+      - .github/workflows/preview-release.yml
+      - scripts/release.py
+      - docs/releases.md
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'sraodev/SmartPod'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check source identity
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-preview\.[0-9]+$ ]]
+            git merge-base --is-ancestor HEAD origin/master
+          fi
+          echo "SOURCE_DATE_EPOCH=$(git show -s --format=%ct HEAD)" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Build exact checked-out source
+        env:
+          CI: "true"
+          PLATFORMIO_SETTING_ENABLE_TELEMETRY: "no"
+        run: |
+          npm --prefix interface ci
+          npm --prefix interface test -- --watchAll=false
+          npm --prefix interface run build
+          python -m pip install platformio==6.1.19
+          python -m unittest discover -s tests -p 'test_*.py' -v
+          pio run -e esp12e
+          pio run -e esp12e -t buildfs
+      - name: Assemble and verify release package
+        run: python scripts/release.py assemble dist-release --commit "$GITHUB_SHA"
+        if: github.ref_type != 'tag'
+      - name: Assemble tagged release package
+        if: github.ref_type == 'tag'
+        run: python scripts/release.py assemble dist-release --commit "$GITHUB_SHA" --tag "$GITHUB_REF_NAME"
+      - name: Attest all exact package bytes
+        uses: actions/attest-build-provenance@v4.2.2
+        with:
+          subject-path: dist-release/*
+      - uses: actions/upload-artifact@v7
+        with:
+          name: preview-package
+          path: dist-release/*
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/download-artifact@v8.0.1
+        with:
+          name: preview-package
+          path: release-verified
+      - name: Verify uploaded bytes and independent provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/release.py verify release-verified --commit "$GITHUB_SHA"
+          diff dist-release/SHA256SUMS.txt release-verified/SHA256SUMS.txt
+          gh attestation verify release-verified/manifest.json --repo sraodev/SmartPod --signer-workflow sraodev/SmartPod/.github/workflows/preview-release.yml --source-digest "$GITHUB_SHA" --source-ref "$GITHUB_REF" --deny-self-hosted-runners
+
+  publish:
+    needs: build
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      attestations: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@v8.0.1
+        with:
+          name: preview-package
+          path: dist-release
+      - name: Verify provenance before creating a new draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh attestation verify dist-release/manifest.json --repo sraodev/SmartPod --signer-workflow sraodev/SmartPod/.github/workflows/preview-release.yml --source-digest "$GITHUB_SHA" --source-ref "$GITHUB_REF" --deny-self-hosted-runners
+      - name: Publish new preview only after release download matches
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/release.py publish dist-release --commit "$GITHUB_SHA" --tag "$GITHUB_REF_NAME"

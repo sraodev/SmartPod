@@ -11,3 +11,5 @@
 __pycache__/
 /gateway/build/
 /gateway/smartpod-gateway.db*
+/dist-release/
+/release-verified/
