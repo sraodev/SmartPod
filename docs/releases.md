@@ -54,6 +54,8 @@ downloaded into a fresh directory, and must match both the downloaded manifest a
 the original local files before the draft becomes public. The release remains a
 prerelease and is not marked latest. A partial upload or verification failure leaves
 a draft for manual investigation; rerunning will not silently resume or overwrite it.
+The remote tag is checked against the built commit before draft creation and again
+before publication, including annotated-tag dereferencing. A moved tag stops publication.
 
 This no-overwrite behavior applies to the automation. Repository administrators
 should also enable GitHub's [immutable releases](https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases)

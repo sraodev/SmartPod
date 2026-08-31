@@ -141,10 +141,10 @@ class ReleaseTests(unittest.TestCase):
 
     def test_existing_release_or_creation_failure_never_uploads(self):
         with patch.object(release, "source_identity"), patch.object(release, "command") as command:
-            command.side_effect = ["", subprocess.CalledProcessError(1, "gh release create")]
+            command.side_effect = ["", f"{COMMIT}\trefs/tags/{TAG}", subprocess.CalledProcessError(1, "gh release create")]
             with self.assertRaises(subprocess.CalledProcessError):
                 release.publish(self.root, self.package, COMMIT, TAG)
-            self.assertEqual(command.call_count, 2)
+            self.assertEqual(command.call_count, 3)
             self.assertIn("create", command.call_args.args)
 
     def test_publish_only_after_downloaded_bytes_match(self):
@@ -153,6 +153,8 @@ class ReleaseTests(unittest.TestCase):
                 calls = []
                 def fake_command(*args, **kwargs):
                     calls.append(args)
+                    if args[:2] == ("git", "ls-remote"):
+                        return f"{COMMIT}\trefs/tags/{TAG}"
                     if args[:3] == ("gh", "release", "download"):
                         dest = Path(args[args.index("--dir") + 1])
                         shutil.copytree(self.package, dest, dirs_exist_ok=True)
@@ -167,6 +169,13 @@ class ReleaseTests(unittest.TestCase):
                         release.publish(self.root, self.package, COMMIT, TAG)
                 self.assertEqual(any(c[:3] == ("gh", "release", "edit") for c in calls), not tamper)
                 self.assertFalse(any("--clobber" in c for c in calls))
+
+    def test_remote_tag_checks_lightweight_and_annotated_tags(self):
+        for output in [f"{COMMIT}\trefs/tags/{TAG}", f"{'b' * 40}\trefs/tags/{TAG}\n{COMMIT}\trefs/tags/{TAG}^{{}}"]:
+            with patch.object(release, "command", return_value=output):
+                release.verify_remote_tag(self.root, COMMIT, TAG)
+        with patch.object(release, "command", return_value=f"{'b' * 40}\trefs/tags/{TAG}"), self.assertRaisesRegex(ValueError, "Remote tag"):
+            release.verify_remote_tag(self.root, COMMIT, TAG)
 
 
 if __name__ == "__main__":

@@ -198,12 +198,21 @@ def verify(directory, expected_commit, tag=None):
     return manifest
 
 
+def verify_remote_tag(root, expected_commit, tag):
+    ref = f"refs/tags/{tag}"
+    output = command("git", "ls-remote", "--exit-code", "origin", ref, ref + "^{}", cwd=root)
+    refs = {name: sha for sha, name in (line.split() for line in output.splitlines())}
+    if refs.get(ref + "^{}", refs.get(ref)) != expected_commit:
+        raise ValueError("Remote tag moved or does not match the built commit")
+
+
 def publish(root, directory, expected_commit, tag):
     if not tag:
         raise ValueError("Publication requires an existing preview tag")
     source_identity(root, expected_commit, tag)
     verify(directory, expected_commit, tag)
     command("git", "merge-base", "--is-ancestor", expected_commit, "origin/master", cwd=root)
+    verify_remote_tag(root, expected_commit, tag)
     # Creation is the no-overwrite guard: an existing release (including draft)
     # makes gh fail. Never resume one implicitly and never use upload --clobber.
     command("gh", "release", "create", tag, "--repo", REPOSITORY, "--verify-tag", "--draft", "--prerelease",
@@ -216,6 +225,7 @@ def publish(root, directory, expected_commit, tag):
         verify(downloaded, expected_commit, tag)
         if any(digest(downloaded / name) != digest(directory / name) for name in FILES):
             raise ValueError("Uploaded release bytes differ; leaving draft unpublished")
+    verify_remote_tag(root, expected_commit, tag)
     command("gh", "release", "edit", tag, "--repo", REPOSITORY, "--draft=false", "--prerelease", "--latest=false")
 
 
