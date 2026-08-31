@@ -39,6 +39,55 @@ describe('SmartPodDemo', () => {
     expect(findButton(container, 'Inject thermal fault')).toBeTruthy();
     expect(container.textContent).toContain('Real billing requires a certified meter');
   });
+    test('provides accessible names and keyboard focus targets for simulator controls', () => {
+    const controlByName = name =>
+      container.querySelector(`[aria-label="${name}"]`);
+
+    const start = controlByName('Start simulated charging session');
+    const stop = controlByName('Stop simulated charging session safely');
+    const fault = controlByName('Inject simulated thermal safety fault');
+    const network = controlByName('Network connection availability');
+    const currentLimit = controlByName('Simulated current limit');
+    const tariffControls = [
+      controlByName('Energy tariff in rupees per kilowatt-hour'),
+      controlByName('Session fee tariff in rupees'),
+      controlByName('Time tariff in rupees per minute'),
+      controlByName('Tariff tax percentage')
+    ];
+
+    [
+      start,
+      stop,
+      fault,
+      network,
+      currentLimit,
+      ...tariffControls
+    ].forEach(control => {
+      expect(control).toBeTruthy();
+    });
+
+    [start, network, currentLimit, ...tariffControls].forEach(control => {
+      control.focus();
+      expect(document.activeElement).toBe(control);
+    });
+
+    const status = container.querySelector('[role="status"]');
+    expect(status).toBeTruthy();
+    expect(status.getAttribute('aria-live')).toBe('polite');
+
+    act(() => {
+      start.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      jest.advanceTimersByTime(700);
+    });
+
+    expect(stop.disabled).toBe(false);
+    expect(fault.disabled).toBe(false);
+
+    [stop, fault].forEach(control => {
+      control.focus();
+      expect(document.activeElement).toBe(control);
+    });
+  });
 
   test('starts, advances, and safely completes a simulated session', () => {
     act(() => {
