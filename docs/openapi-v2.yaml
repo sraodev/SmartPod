@@ -11,11 +11,17 @@ info:
     The browser lab is not a gateway. Its contract examples are simulated local
     estimates, not authoritative meter readings, receipts, or payment results.
     See simulator-contract.md for the explicit milli-Wh and state boundary.
+    The local gateway preview implements only GET /v1/ports and GET /v1/ports/{portId}
+    under /api, with bearer authentication and loopback-only HTTP. Its fixed replay
+    is synthetic and not connected to the browser lab. Session commands and events
+    remain unimplemented; see gateway.md for startup and security restrictions.
 security:
   - bearerAuth: []
 servers:
+  - url: http://127.0.0.1:8080/api
+    description: Implemented loopback-only simulator preview; GET port endpoints only
   - url: https://{host}/api
-    description: SmartPod control plane or site gateway
+    description: Proposed secured control plane or site gateway (not implemented)
     variables:
       host:
         default: smartpod.local
@@ -40,6 +46,12 @@ paths:
                       $ref: "#/components/schemas/Port"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "503":
+          $ref: "#/components/responses/Unavailable"
   /v1/ports/{portId}:
     parameters:
       - $ref: "#/components/parameters/PortId"
@@ -57,6 +69,12 @@ paths:
           $ref: "#/components/responses/NotFound"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "503":
+          $ref: "#/components/responses/Unavailable"
   /v1/sessions:
     post:
       operationId: startSession
@@ -173,6 +191,29 @@ components:
         minLength: 16
         maxLength: 128
   responses:
+    Forbidden:
+      description: Host or browser-origin policy rejected the request
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    MethodNotAllowed:
+      description: Only GET is supported on implemented port endpoints
+      headers:
+        Allow:
+          schema:
+            type: string
+            const: GET
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Unavailable:
+      description: Persistent simulator storage is unavailable; no in-memory fallback
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
     Unauthorized:
       description: Authentication is missing or invalid
       content:

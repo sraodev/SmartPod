@@ -9,3 +9,5 @@
 /interface/node_modules
 .vscode
 __pycache__/
+/gateway/build/
+/gateway/smartpod-gateway.db*

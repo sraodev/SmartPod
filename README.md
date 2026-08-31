@@ -99,6 +99,11 @@ That architecture can support an ESP, STM32, RP2040, existing EVSE controller, c
 
 Read the full [SmartPod v2 architecture and phased delivery plan](docs/architecture-v2.md) or inspect the draft [OpenAPI contract](docs/openapi-v2.yaml).
 
+The [local Go/SQLite gateway preview](docs/gateway.md) now provides authenticated,
+read-only port endpoints with persistent synthetic readings. It runs on loopback
+only and has no hardware control, payments, or browser integration. Build it from
+source; the separate CLI and release installer assets are still future work.
+
 ## Hardware
 
 For a bench prototype you need:
