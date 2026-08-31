@@ -39,6 +39,9 @@ jobs:
         env:
           CI: "true"
 
+      - name: Validate gateway contract and examples
+        run: npx --yes @redocly/cli@2.49.0 lint docs/openapi-v2.yaml
+
       - name: Build dashboard
         working-directory: interface
         run: npm run build

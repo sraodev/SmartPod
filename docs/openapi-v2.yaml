@@ -8,6 +8,9 @@ info:
   description: |
     Draft hardware-neutral contract for SmartPod v2. Commands express intent;
     responses and events report the controller's actual state.
+    The browser lab is not a gateway. Its contract examples are simulated local
+    estimates, not authoritative meter readings, receipts, or payment results.
+    See simulator-contract.md for the explicit milli-Wh and state boundary.
 security:
   - bearerAuth: []
 servers:
@@ -187,6 +190,22 @@ components:
       type: object
       additionalProperties: false
       required: [id, mode, state, actual_output, measurement, faults, updated_at]
+      examples:
+        - id: lab-port-1
+          mode: simulator
+          state: available
+          actual_output: open
+          active_session_id: null
+          measurement:
+            sequence: 120
+            voltage_mv: 230000
+            current_ma: 0
+            active_power_w: 0
+            energy_wh: 500
+            quality: estimated
+            sampled_at: "2026-08-31T10:02:00Z"
+          faults: []
+          updated_at: "2026-08-31T10:02:00Z"
       properties:
         id:
           type: string
@@ -199,6 +218,7 @@ components:
         actual_output:
           type: string
           enum: [open, closed, unknown]
+          description: Explicit adapter feedback, never inferred from commands or session state. Missing or untrusted feedback is unknown; simulator feedback is synthetic, not physical evidence.
         measurement:
           $ref: "#/components/schemas/Measurement"
         faults:
@@ -229,6 +249,7 @@ components:
         energy_wh:
           type: integer
           minimum: 0
+          description: Cumulative whole Wh in the adapter's meter epoch. The lab projects floor(energyMilliWh / 1000) from its session-relative counter, retaining the milli-Wh source and remainder locally; this estimate must not be used to reconstruct a bill. A future meter adapter must declare its epoch/reset behavior.
         quality:
           type: string
           enum: [measured, estimated, stale, invalid]
@@ -239,6 +260,35 @@ components:
       type: object
       additionalProperties: false
       required: [id, port_id, state, tariff, start_energy_wh, charge, created_at]
+      examples:
+        - id: lab-session-1
+          port_id: lab-port-1
+          state: completed
+          tariff:
+            id: demo-inr-standard
+            version: 1
+            currency: INR
+            fixed_minor: 500
+            energy_per_kwh_minor: 1200
+            time_per_minute_minor: 20
+            idle_per_minute_minor: 0
+            tax_basis_points: 1800
+          start_energy_wh: 0
+          end_energy_wh: 500
+          charge:
+            currency: INR
+            fixed_minor: 500
+            energy_minor: 601
+            time_minor: 40
+            idle_minor: 0
+            tax_minor: 205
+            total_minor: 1346
+            estimated: true
+          payment_state: not_required
+          stop_reason: user_stop
+          created_at: "2026-08-31T10:00:00Z"
+          started_at: "2026-08-31T10:00:00Z"
+          ended_at: "2026-08-31T10:02:00Z"
       properties:
         id:
           type: string
@@ -254,6 +304,7 @@ components:
         start_energy_wh:
           type: integer
           minimum: 0
+          description: Start reading in the same meter epoch as the end reading. The lab counter starts at zero per session, unlike a physical lifetime meter.
         end_energy_wh:
           type: [integer, "null"]
           minimum: 0
@@ -338,6 +389,7 @@ components:
           type: integer
         estimated:
           type: boolean
+          description: Always true for browser-lab examples. A local simulator estimate is not an authoritative gateway charge or settlement, even after completion.
     Fault:
       type: object
       additionalProperties: false
