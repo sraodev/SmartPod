@@ -206,18 +206,20 @@ const styles = theme => ({
       }
     }
   },
-      actionButton: {
-    '&:focus, &:focus-visible, &.Mui-focusVisible': {
+  // Keyboard focus only. A bare :focus would paint the ring on mouse clicks
+  // too, which is what Mui-focusVisible exists to avoid.
+  actionButton: {
+    '&:focus-visible, &.Mui-focusVisible': {
       outline: '3px solid #ffffff',
       outlineOffset: 3
     }
   },
-    slider: {
-    '& .MuiSlider-thumb:focus, & .MuiSlider-thumb.Mui-focusVisible': {
+  slider: {
+    '& .MuiSlider-thumb.Mui-focusVisible': {
       boxShadow: '0 0 0 4px rgba(255, 255, 255, 0.9)'
     }
   },
-    networkControl: {
+  networkControl: {
     maxWidth: '100%',
     marginLeft: 0,
     marginRight: 0,
@@ -228,12 +230,7 @@ const styles = theme => ({
       outline: '3px solid #ffffff',
       outlineOffset: 2,
       borderRadius: '50%'
-    },
-        '&:focus-within': {
-      outline: '3px solid #ffffff',
-      outlineOffset: 2,
-      borderRadius: 24
-    },
+    }
   },
   primaryAction: {
     fontWeight: 700
@@ -492,12 +489,8 @@ class SmartPodDemo extends Component {
             <Typography variant="h6" className={classes.heroCopy}>
               Explore SmartPod's proposed hardware-neutral session model. Start a simulated port, tune its current and tariff, disconnect the network, or inject a safety fault.
             </Typography>
-            <div
-  className={classes.statusRow}
-  role="status"
-  aria-live="polite"
-  aria-atomic="true"
->
+            {/* role="status" already implies polite, atomic announcements. */}
+            <div className={classes.statusRow} role="status">
               <Chip color={fault ? 'secondary' : 'primary'} label={statusLabels[sessionState]} icon={fault ? <WarningIcon /> : <EvStationIcon />} />
               <Chip variant="outlined" label={networkOnline ? 'Gateway online' : 'Offline ledger active'} icon={!networkOnline ? <CloudOffIcon /> : undefined} />
               <Chip variant="outlined" label={active ? 'Contactor feedback: closed' : 'Contactor feedback: open'} />
@@ -540,6 +533,7 @@ class SmartPodDemo extends Component {
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <TextField
+                      id="nominal-voltage"
                       className={classes.textField}
                       label="Nominal voltage"
                       type="number"
@@ -554,14 +548,13 @@ class SmartPodDemo extends Component {
                   <Grid item xs={12} sm={6}>
                     <FormControlLabel
                       className={classes.networkControl}
-                      control={
-  <Switch
-    checked={networkOnline}
-    onChange={event => this.setState({ networkOnline: event.target.checked })}
-    color="primary"
-    inputProps={{ 'aria-label': 'Network connection availability' }}
-  />
-}
+                      control={(
+                        <Switch
+                          checked={networkOnline}
+                          onChange={event => this.setState({ networkOnline: event.target.checked })}
+                          color="primary"
+                        />
+                      )}
                       label={networkOnline ? 'Cloud connection available' : 'Simulate network outage'}
                     />
                     {!networkOnline && (
@@ -572,52 +565,48 @@ class SmartPodDemo extends Component {
                   </Grid>
                 </Grid>
 
-               <div className={classes.actions}>
-  <Button
-    className={`${classes.primaryAction} ${classes.actionButton}`}
-    variant="contained"
-    color="primary"
-    startIcon={<PlayArrowIcon />}
-    onClick={this.startSession}
-    disabled={!canStart}
-    aria-label="Start simulated charging session"
-  >
-    Start session
-  </Button>
+                <div className={classes.actions}>
+                  <Button
+                    className={`${classes.primaryAction} ${classes.actionButton}`}
+                    variant="contained"
+                    color="primary"
+                    startIcon={<PlayArrowIcon />}
+                    onClick={this.startSession}
+                    disabled={!canStart}
+                  >
+                    Start session
+                  </Button>
 
-  <Button
-    className={classes.actionButton}
-    variant="contained"
-    color="secondary"
-    startIcon={<StopIcon />}
-    onClick={this.stopSession}
-    disabled={!active}
-    aria-label="Stop simulated charging session safely"
-  >
-    Stop safely
-  </Button>
+                  <Button
+                    className={classes.actionButton}
+                    variant="contained"
+                    color="secondary"
+                    startIcon={<StopIcon />}
+                    onClick={this.stopSession}
+                    disabled={!active}
+                  >
+                    Stop safely
+                  </Button>
 
-  <Button
-    className={`${classes.faultAction} ${classes.actionButton}`}
-    variant="outlined"
-    startIcon={<WarningIcon />}
-    onClick={this.simulateFault}
-    disabled={!canFault}
-    aria-label="Inject simulated thermal safety fault"
-  >
-    Inject thermal fault
-  </Button>
+                  <Button
+                    className={`${classes.faultAction} ${classes.actionButton}`}
+                    variant="outlined"
+                    startIcon={<WarningIcon />}
+                    onClick={this.simulateFault}
+                    disabled={!canFault}
+                  >
+                    Inject thermal fault
+                  </Button>
 
-  <Button
-    className={classes.actionButton}
-    variant="text"
-    startIcon={<RefreshIcon />}
-    onClick={this.resetSimulator}
-    aria-label="Reset simulator"
-  >
-    Reset
-  </Button>
-</div>
+                  <Button
+                    className={classes.actionButton}
+                    variant="text"
+                    startIcon={<RefreshIcon />}
+                    onClick={this.resetSimulator}
+                  >
+                    Reset
+                  </Button>
+                </div>
               </Paper>
             </Grid>
 
@@ -627,88 +616,73 @@ class SmartPodDemo extends Component {
                 <Typography variant="body2" className={classes.sectionCopy}>These fields configure the next session. Active and completed totals keep their original snapshot.</Typography>
 
                 <Grid container spacing={2} className={classes.tariffGrid}>
-  <Grid item xs={12} sm={6}>
-    <TextField
-      className={classes.textField}
-      label="Energy ₹/kWh"
-      type="number"
-      variant="outlined"
-      fullWidth
-      value={(draftTariff.energyPerKwhMinor / 100).toFixed(2)}
-      onChange={this.updateTariff('energyPerKwhMinor')}
-      disabled={tariffLocked}
-      inputProps={{
-        min: 0,
-        step: 0.5,
-        'aria-label': 'Energy tariff in rupees per kilowatt-hour'
-      }}
-    />
-  </Grid>
+                  {/* id wires MUI's label to the input; without it v4 leaves
+                      htmlFor undefined and the field has no accessible name. */}
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      id="tariff-energy-per-kwh"
+                      className={classes.textField}
+                      label="Energy ₹/kWh"
+                      type="number"
+                      variant="outlined"
+                      fullWidth
+                      value={(draftTariff.energyPerKwhMinor / 100).toFixed(2)}
+                      onChange={this.updateTariff('energyPerKwhMinor')}
+                      disabled={tariffLocked}
+                      inputProps={{ min: 0, step: 0.5 }}
+                    />
+                  </Grid>
 
-  <Grid item xs={12} sm={6}>
-    <TextField
-      className={classes.textField}
-      label="Session fee ₹"
-      type="number"
-      variant="outlined"
-      fullWidth
-      value={(draftTariff.fixedMinor / 100).toFixed(2)}
-      onChange={this.updateTariff('fixedMinor')}
-      disabled={tariffLocked}
-      inputProps={{
-        min: 0,
-        step: 1,
-        'aria-label': 'Session fee tariff in rupees'
-      }}
-    />
-  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      id="tariff-session-fee"
+                      className={classes.textField}
+                      label="Session fee ₹"
+                      type="number"
+                      variant="outlined"
+                      fullWidth
+                      value={(draftTariff.fixedMinor / 100).toFixed(2)}
+                      onChange={this.updateTariff('fixedMinor')}
+                      disabled={tariffLocked}
+                      inputProps={{ min: 0, step: 1 }}
+                    />
+                  </Grid>
 
-  <Grid item xs={12} sm={6}>
-    <TextField
-      className={classes.textField}
-      label="Time ₹/min"
-      type="number"
-      variant="outlined"
-      fullWidth
-      value={(draftTariff.timePerMinuteMinor / 100).toFixed(2)}
-      onChange={this.updateTariff('timePerMinuteMinor')}
-      disabled={tariffLocked}
-      inputProps={{
-        min: 0,
-        step: 0.1,
-        'aria-label': 'Time tariff in rupees per minute'
-      }}
-    />
-  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      id="tariff-time-per-minute"
+                      className={classes.textField}
+                      label="Time ₹/min"
+                      type="number"
+                      variant="outlined"
+                      fullWidth
+                      value={(draftTariff.timePerMinuteMinor / 100).toFixed(2)}
+                      onChange={this.updateTariff('timePerMinuteMinor')}
+                      disabled={tariffLocked}
+                      inputProps={{ min: 0, step: 0.1 }}
+                    />
+                  </Grid>
 
-  <Grid item xs={12} sm={6}>
-    <TextField
-      className={classes.textField}
-      label="Tax %"
-      type="number"
-      variant="outlined"
-      fullWidth
-      value={(draftTariff.taxBasisPoints / 100).toFixed(2)}
-      onChange={event =>
-        this.setState(previous => ({
-          draftTariff: {
-            ...previous.draftTariff,
-            taxBasisPoints: Math.max(
-              0,
-              Math.round((Number(event.target.value) || 0) * 100)
-            )
-          }
-        }))
-      }
-      disabled={tariffLocked}
-      inputProps={{
-        min: 0,
-        step: 1,
-        'aria-label': 'Tariff tax percentage'
-      }}
-    />
-  </Grid>
-</Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      id="tariff-tax-percent"
+                      className={classes.textField}
+                      label="Tax %"
+                      type="number"
+                      variant="outlined"
+                      fullWidth
+                      value={(draftTariff.taxBasisPoints / 100).toFixed(2)}
+                      onChange={event => this.setState(previous => ({
+                        draftTariff: {
+                          ...previous.draftTariff,
+                          taxBasisPoints: Math.max(0, Math.round((Number(event.target.value) || 0) * 100))
+                        }
+                      }))}
+                      disabled={tariffLocked}
+                      inputProps={{ min: 0, step: 1 }}
+                    />
+                  </Grid>
+                </Grid>
 
                 <div className={classes.ledger}>
                   <Divider />
