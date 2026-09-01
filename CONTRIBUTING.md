@@ -15,10 +15,11 @@ Please open an issue before starting a large dependency migration, hardware rede
 
 ## Development setup
 
-SmartPod has two build targets:
+SmartPod has these build targets:
 
 - Firmware in `src/`, built with PlatformIO.
 - Dashboard in `interface/`, built with npm.
+- Read-only gateway and CLI in `gateway/`, built with Go; see the [hardware-free CLI quickstart](docs/cli.md).
 
 Follow the [README quick start](README.md#quick-start) first. The GitHub Actions workflow records the supported CI tool versions.
 
@@ -41,6 +42,14 @@ npm run build:demo
 # Firmware
 cd ..
 platformio run
+
+# Hardware-free gateway and CLI
+cd gateway
+go test -race ./...
+go vet ./...
+go build -o build/smartpod ./cmd/smartpod
+cd ..
+node scripts/test-gateway-contract.cjs
 ```
 
 If hardware is required, include the board, sensor variant, wiring conditions, and reference equipment in your test notes. Never include Wi-Fi passwords, tokens, private IPs, or other secrets in logs or screenshots.

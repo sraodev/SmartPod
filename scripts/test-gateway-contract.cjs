@@ -10,6 +10,7 @@ const yaml = require('../interface/node_modules/js-yaml');
 const root = path.resolve(__dirname, '..');
 const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'smartpod-gateway-test-'));
 const binary = path.join(scratch, 'smartpod-gateway');
+const cli = path.join(scratch, 'smartpod');
 const token = randomBytes(32).toString('hex');
 const spec = yaml.safeLoad(fs.readFileSync(path.join(root, 'docs/openapi-v2.yaml'), 'utf8'));
 let exampleCount = 0;
@@ -70,11 +71,28 @@ async function request(service, endpoint, status, options = {}) {
 
 async function main() {
   execFileSync('go', ['build', '-o', binary, '.'], { cwd: path.join(root, 'gateway'), stdio: 'inherit' });
+  execFileSync('go', ['build', '-o', cli, './cmd/smartpod'], { cwd: path.join(root, 'gateway'), stdio: 'inherit' });
   let service = await start();
   let latest;
   try {
     const list = await request(service, '/v1/ports', 200);
     assert.equal(list.ports.length, 1);
+    for (const command of [['status'], ['ports'], ['ports', 'sim-port-1']]) {
+      const output = execFileSync(cli, ['--endpoint', `${service.url}/api`, '--json', ...command], {
+        env: { ...process.env, SMARTPOD_GATEWAY_TOKEN: token }, encoding: 'utf8', timeout: 10000
+      });
+      assert.ok(!output.includes(token), 'CLI must never print its token');
+      const result = JSON.parse(output);
+      assert.equal(result.schema_version, 1);
+      if (command[0] === 'status') {
+        assert.deepEqual(result, { schema_version: 1, command: 'status', reachable: true, port_count: 1 });
+      } else {
+        const port = command.length === 2 ? result.port : result.ports[0];
+        assert.equal(port.id, list.ports[0].id);
+        assert.equal(port.measurement.quality, 'estimated');
+        assert.equal(port.measurement.energy_wh, Math.floor(port.measurement.sequence / 10));
+      }
+    }
     const deadline = Date.now() + 5000;
     do {
       latest = await request(service, '/v1/ports/sim-port-1', 200);
@@ -98,7 +116,7 @@ async function main() {
   const contract = path.join(scratch, 'actual-responses.json');
   fs.writeFileSync(contract, JSON.stringify(spec));
   execFileSync('npx', ['--yes', '@redocly/cli@2.49.0', 'lint', contract, '--config', path.join(root, 'redocly.yaml')], { cwd: root, stdio: 'inherit' });
-  console.log(`Gateway lifecycle and ${exampleCount} actual response examples passed.`);
+  console.log(`CLI commands, gateway lifecycle, and ${exampleCount} actual response examples passed.`);
 }
 
 main().catch(error => { console.error(error.message); process.exitCode = 1; }).finally(() => {

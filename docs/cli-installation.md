@@ -2,7 +2,7 @@
 
 Status: **installer implemented; CLI release binaries not yet published**. The legacy `v0.1.0-preview.1` firmware release is not a CLI release. The installer will fail without changing an existing installation if no suitable release or asset exists.
 
-CLI implementation is tracked in [#14](https://github.com/sraodev/SmartPod/issues/14), banner work in [#15](https://github.com/sraodev/SmartPod/issues/15), release verification in [#21](https://github.com/sraodev/SmartPod/issues/21), and installer work in [#23](https://github.com/sraodev/SmartPod/issues/23).
+The [read-only CLI is available from source](cli.md) ([#14](https://github.com/sraodev/SmartPod/issues/14)). Banner work is tracked in [#15](https://github.com/sraodev/SmartPod/issues/15), firmware release verification in [#21](https://github.com/sraodev/SmartPod/issues/21), and installer work in [#23](https://github.com/sraodev/SmartPod/issues/23). CLI release packaging and target-native install verification remain separate delivery gates.
 
 ## Install after the first CLI release
 
