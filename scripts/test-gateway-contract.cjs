@@ -72,6 +72,9 @@ async function request(service, endpoint, status, options = {}) {
 async function main() {
   execFileSync('go', ['build', '-o', binary, '.'], { cwd: path.join(root, 'gateway'), stdio: 'inherit' });
   execFileSync('go', ['build', '-o', cli, './cmd/smartpod'], { cwd: path.join(root, 'gateway'), stdio: 'inherit' });
+  const redirectedHelp = execFileSync(cli, ['help'], { encoding: 'utf8', timeout: 10000 });
+  assert.ok(redirectedHelp.startsWith('Usage: smartpod'), 'Redirected help must start with usage');
+  assert.ok(!redirectedHelp.includes('SIMULATOR PREVIEW') && !redirectedHelp.includes('\x1b['), 'Redirected help must be banner-free');
   let service = await start();
   let latest;
   try {

@@ -19,6 +19,11 @@ import (
 
 var version = "dev"
 
+const asciiMark = `+------------------------------------------+
+| SMARTPOD                                 |
++------------------------------------------+
+`
+
 const usage = `Usage: smartpod [options] <command>
 
 Commands:
@@ -31,6 +36,8 @@ Options (before the command):
   --endpoint URL   API base URL (default http://127.0.0.1:8080/api)
   --timeout D      Request timeout, 1ms to 30s (default 5s)
   --json           Schema-versioned JSON for status, ports, or version
+  --no-banner      Hide the interactive banner
+  --no-color       Disable ANSI color in the interactive banner
   --help, -h       Show help
   --version        Show the CLI version
 
@@ -71,10 +78,11 @@ type port struct {
 }
 
 func main() {
-	os.Exit(run(os.Args[1:], os.Getenv("SMARTPOD_GATEWAY_TOKEN"), os.Stdout, os.Stderr))
+	_, noColor := os.LookupEnv("NO_COLOR")
+	os.Exit(run(os.Args[1:], os.Getenv("SMARTPOD_GATEWAY_TOKEN"), os.Stdout, os.Stderr, isTerminal(os.Stdout), noColor))
 }
 
-func run(args []string, token string, stdout, stderr io.Writer) int {
+func run(args []string, token string, stdout, stderr io.Writer, interactive, noColorEnvironment bool) int {
 	fail := func(code int, message string) int {
 		fmt.Fprintln(stderr, "smartpod: "+message)
 		return code
@@ -85,6 +93,8 @@ func run(args []string, token string, stdout, stderr io.Writer) int {
 	endpoint := flags.String("endpoint", "http://127.0.0.1:8080/api", "")
 	timeout := flags.Duration("timeout", 5*time.Second, "")
 	asJSON := flags.Bool("json", false, "")
+	noBanner := flags.Bool("no-banner", false, "")
+	noColor := flags.Bool("no-color", false, "")
 	help := flags.Bool("help", false, "")
 	flags.BoolVar(help, "h", false, "")
 	showVersion := flags.Bool("version", false, "")
@@ -112,7 +122,12 @@ func run(args []string, token string, stdout, stderr io.Writer) int {
 		if *asJSON {
 			return fail(2, "JSON output is available for status, ports, and version")
 		}
-		if _, err := io.WriteString(stdout, usage); err != nil {
+		var out bytes.Buffer
+		if interactive && !*noBanner {
+			writeBanner(&out, !*noColor && !noColorEnvironment)
+		}
+		out.WriteString(usage)
+		if _, err := stdout.Write(out.Bytes()); err != nil {
 			return fail(1, "cannot write output")
 		}
 		return 0
@@ -222,6 +237,9 @@ func run(args []string, token string, stdout, stderr io.Writer) int {
 		return writeResult(stdout, stderr, result)
 	}
 	var out bytes.Buffer
+	if interactive && !*noBanner {
+		writeBanner(&out, !*noColor && !noColorEnvironment)
+	}
 	if command == "status" {
 		fmt.Fprintf(&out, "Gateway read API reachable; %d port(s).\n", len(list.Ports))
 	} else if id != "" {
@@ -238,6 +256,38 @@ func run(args []string, token string, stdout, stderr io.Writer) int {
 		return fail(1, "cannot write output")
 	}
 	return 0
+}
+
+func isTerminal(file *os.File) bool {
+	info, err := file.Stat()
+	return err == nil && info.Mode()&os.ModeCharDevice != 0
+}
+
+func writeBanner(out io.Writer, color bool) {
+	if color {
+		fmt.Fprint(out, "\x1b[36m", asciiMark, "\x1b[0m")
+	} else {
+		fmt.Fprint(out, asciiMark)
+	}
+	fmt.Fprintf(out, "SmartPod %s | SIMULATOR PREVIEW | read-only\n\n", bannerVersion(version))
+}
+
+func bannerVersion(value string) string {
+	var out strings.Builder
+	for _, r := range value {
+		if out.Len() == 24 {
+			break
+		}
+		if r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || strings.ContainsRune(".+_-", r) {
+			out.WriteRune(r)
+		} else {
+			out.WriteByte('?')
+		}
+	}
+	if out.Len() == 0 {
+		return "unknown"
+	}
+	return out.String()
 }
 
 func writeResult(stdout, stderr io.Writer, result any) int {

@@ -20,7 +20,7 @@ const fixture = `{"id":"sim-port-1","mode":"simulator","state":"active","actual_
 func invoke(t *testing.T, args []string, token string, wantCode int) (string, string) {
 	t.Helper()
 	var out, diagnostics bytes.Buffer
-	if code := run(args, token, &out, &diagnostics); code != wantCode {
+	if code := run(args, token, &out, &diagnostics, false, false); code != wantCode {
 		t.Fatalf("exit %d, want %d; stderr: %s", code, wantCode, diagnostics.String())
 	}
 	if token != "" && (strings.Contains(out.String(), token) || strings.Contains(diagnostics.String(), token)) {
@@ -86,7 +86,16 @@ func TestCommands(t *testing.T) {
 			}
 		})
 	}
-	if requests.Load() != 6 {
+	var out, diagnostics bytes.Buffer
+	jsonArgs := []string{"--endpoint", server.URL + "/api", "--json", "status"}
+	if code := run(jsonArgs, testToken, &out, &diagnostics, true, false); code != 0 || strings.Contains(out.String(), "SIMULATOR PREVIEW") || strings.Contains(out.String(), "\x1b[") {
+		t.Fatal("interactive JSON output must remain banner-free")
+	}
+	out.Reset()
+	if code := run([]string{"--endpoint", server.URL + "/api", "status"}, testToken, &out, &diagnostics, true, false); code != 0 || !strings.Contains(out.String(), "SIMULATOR PREVIEW") || !strings.Contains(out.String(), "\x1b[36m") {
+		t.Fatal("interactive human status must include the colored banner")
+	}
+	if requests.Load() != 8 {
 		t.Fatal("each command must make exactly one GET")
 	}
 }
@@ -224,7 +233,7 @@ func (brokenWriter) Write([]byte) (int, error) { return 0, errors.New("unwritabl
 func TestOutputFailure(t *testing.T) {
 	for _, args := range [][]string{{"help"}, {"version"}, {"--json", "version"}} {
 		var stderr bytes.Buffer
-		if run(args, "", brokenWriter{}, &stderr) != 1 || stderr.Len() == 0 {
+		if run(args, "", brokenWriter{}, &stderr, false, false) != 1 || stderr.Len() == 0 {
 			t.Fatal("output failure must be reported")
 		}
 	}
@@ -236,5 +245,59 @@ func TestIPv6Loopback(t *testing.T) {
 		if err != nil || !validEndpoint(u) {
 			t.Fatal("numeric loopback endpoint rejected")
 		}
+	}
+}
+
+func TestBannerOutput(t *testing.T) {
+	tests := []struct {
+		name        string
+		args        []string
+		interactive bool
+		noColorEnv  bool
+		wantBanner  bool
+		wantColor   bool
+	}{
+		{name: "interactive", args: []string{"help"}, interactive: true, wantBanner: true, wantColor: true},
+		{name: "no banner", args: []string{"--no-banner", "help"}, interactive: true},
+		{name: "no color flag", args: []string{"--no-color", "help"}, interactive: true, wantBanner: true},
+		{name: "NO_COLOR", args: []string{"help"}, interactive: true, noColorEnv: true, wantBanner: true},
+		{name: "redirected", args: []string{"help"}},
+		{name: "plain version", args: []string{"version"}, interactive: true},
+		{name: "JSON version", args: []string{"--json", "version"}, interactive: true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			var out, diagnostics bytes.Buffer
+			if code := run(test.args, "", &out, &diagnostics, test.interactive, test.noColorEnv); code != 0 {
+				t.Fatalf("exit %d: %s", code, diagnostics.String())
+			}
+			got := out.String()
+			if strings.Contains(got, "SIMULATOR PREVIEW") != test.wantBanner {
+				t.Fatal("unexpected banner visibility")
+			}
+			if strings.Contains(got, "\x1b[") != test.wantColor {
+				t.Fatal("unexpected ANSI color visibility")
+			}
+		})
+	}
+
+	var plain bytes.Buffer
+	writeBanner(&plain, false)
+	for _, line := range strings.Split(strings.TrimSuffix(plain.String(), "\n"), "\n") {
+		if len(line) > 80 {
+			t.Fatalf("banner line is %d columns: %q", len(line), line)
+		}
+		for _, r := range line {
+			if r > 127 {
+				t.Fatal("plain banner must be ASCII")
+			}
+		}
+	}
+	if got := bannerVersion("\x1b[31mvery-long-version-value-that-does-not-fit"); strings.Contains(got, "\x1b") || len(got) > 24 {
+		t.Fatalf("unsafe banner version %q", got)
+	}
+	var failed, diagnostics bytes.Buffer
+	if code := run([]string{"start"}, "", &failed, &diagnostics, true, false); code != 2 || failed.Len() != 0 || diagnostics.Len() == 0 {
+		t.Fatal("interactive failures must remain banner-free on stdout")
 	}
 }
