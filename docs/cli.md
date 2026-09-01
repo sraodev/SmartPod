@@ -1,7 +1,7 @@
 # Read-only SmartPod CLI
 
 The source-built `smartpod` CLI reads the [local gateway](gateway.md). It has no
-start/stop commands, hardware writes, payment operations, token store, or banner.
+start/stop commands, hardware writes, payment operations, or token store.
 Release binaries are **not published yet**; the [curl installer](cli-installation.md)
 still needs a compatible CLI release. No extra Go dependencies or CLI framework.
 
@@ -68,6 +68,27 @@ Do not expose this preview via tunnels or reverse proxies.
 `status` and `ports` each make one authenticated `GET /api/v1/ports`.
 `ports PORT_ID` makes one `GET /api/v1/ports/PORT_ID`. A CLI port ID is 1–128 ASCII
 letters, digits, hyphens, or underscores, and cannot start with a hyphen.
+
+## Interactive banner
+
+A compact ASCII mark identifies interactive human-readable output:
+
+![SmartPod interactive CLI banner](images/cli-banner.png)
+
+```text
++------------------------------------------+
+| SMARTPOD                                 |
++------------------------------------------+
+SmartPod dev | SIMULATOR PREVIEW | read-only
+```
+
+Color changes only the mark; the words carry all meaning. The banner is shown
+only when stdout is a terminal and the command produces successful human-readable
+output. It is absent from JSON, `version`/`--version`, redirected or piped output,
+and all failures. Use `--no-banner` to suppress it. Use `--no-color`, or set
+`NO_COLOR` to any value (including empty), to keep the banner while suppressing
+ANSI color. The plain banner is ASCII, has no animation or flashing, and every
+line fits within 80 columns.
 
 ## Stable JSON and exit codes
 
