@@ -38,10 +38,24 @@ describe('energy session simulator', () => {
       totalMinor: 1345
     });
   });
+
   describe('tariff charge golden cases', () => {
-    // Rounding contract: round energy and time independently to the nearest
-    // minor unit, with non-negative half ties rounding up. Then calculate tax
-    // from the rounded subtotal and round tax using the same rule.
+    const NO_CHARGE = {
+      fixedMinor: 0,
+      energyMinor: 0,
+      timeMinor: 0,
+      taxMinor: 0,
+      totalMinor: 0
+    };
+
+    // Pricing contract, in order:
+    //   1. Sanitize every input. activeSeconds is floored; everything else is
+    //      rounded. Negative, non-numeric, and absent values all become 0, so
+    //      a tariff missing a field prices the same as one whose rate is 0.
+    //   2. Round energy and time independently to the nearest minor unit,
+    //      with half ties going up. fixedMinor is already in minor units.
+    //   3. Derive tax from the sum of the rounded components and round it the
+    //      same way. Tax never sees the unrounded fractions.
 
     test('keeps a started session free when every tariff rate is zero', () => {
       expect(
@@ -56,26 +70,14 @@ describe('energy session simulator', () => {
           },
           sessionStarted: true
         })
-      ).toEqual({
-        fixedMinor: 0,
-        energyMinor: 0,
-        timeMinor: 0,
-        taxMinor: 0,
-        totalMinor: 0
-      });
+      ).toEqual(NO_CHARGE);
     });
 
     test.each([
       [
         'just below the half-minor tie',
         499999,
-        {
-          fixedMinor: 0,
-          energyMinor: 0,
-          timeMinor: 0,
-          taxMinor: 0,
-          totalMinor: 0
-        }
+        NO_CHARGE
       ],
       [
         'at the half-minor tie',
@@ -149,7 +151,7 @@ describe('energy session simulator', () => {
           totalMinor: 1000001
         }
       ]
-    ])('preserves the exact kWh boundary %s', (_label, energyMilliWh, expected) => {
+    ])('converts milli-Wh at exactly the one kWh divisor %s', (_label, energyMilliWh, expected) => {
       expect(
         calculateCharge({
           energyMilliWh,
@@ -165,21 +167,18 @@ describe('energy session simulator', () => {
       ).toEqual(expected);
     });
 
+    // One minor unit per minute makes each whole second 1/60 of a minor unit,
+    // the finest the floored activeSeconds input can express. At coarser rates
+    // no input lands adjacent to the tie.
     test.each([
       [
         'just below the half-minor tie',
-        2,
-        {
-          fixedMinor: 0,
-          energyMinor: 0,
-          timeMinor: 0,
-          taxMinor: 0,
-          totalMinor: 0
-        }
+        29,
+        NO_CHARGE
       ],
       [
         'at the half-minor tie',
-        3,
+        30,
         {
           fixedMinor: 0,
           energyMinor: 0,
@@ -190,7 +189,7 @@ describe('energy session simulator', () => {
       ],
       [
         'just above the half-minor tie',
-        4,
+        31,
         {
           fixedMinor: 0,
           energyMinor: 0,
@@ -207,7 +206,7 @@ describe('energy session simulator', () => {
           tariff: {
             fixedMinor: 0,
             energyPerKwhMinor: 0,
-            timePerMinuteMinor: 10,
+            timePerMinuteMinor: 1,
             taxBasisPoints: 0
           },
           sessionStarted: true
@@ -215,10 +214,13 @@ describe('energy session simulator', () => {
       ).toEqual(expected);
     });
 
+    // Varying basis points against a subtotal of 1 puts the tax fraction
+    // within 1/10000 of the tie; varying fixedMinor instead moves it in
+    // quarter-unit steps and never gets close.
     test.each([
       [
         'just below the half-minor tie',
-        1,
+        4999,
         {
           fixedMinor: 1,
           energyMinor: 0,
@@ -229,42 +231,43 @@ describe('energy session simulator', () => {
       ],
       [
         'at the half-minor tie',
-        2,
+        5000,
         {
-          fixedMinor: 2,
+          fixedMinor: 1,
           energyMinor: 0,
           timeMinor: 0,
           taxMinor: 1,
-          totalMinor: 3
+          totalMinor: 2
         }
       ],
       [
         'just above the half-minor tie',
-        3,
+        5001,
         {
-          fixedMinor: 3,
+          fixedMinor: 1,
           energyMinor: 0,
           timeMinor: 0,
           taxMinor: 1,
-          totalMinor: 4
+          totalMinor: 2
         }
       ]
-    ])('rounds fractional tax %s', (_label, fixedMinor, expected) => {
+    ])('rounds fractional tax %s', (_label, taxBasisPoints, expected) => {
       expect(
         calculateCharge({
           energyMilliWh: 0,
           activeSeconds: 0,
           tariff: {
-            fixedMinor,
+            fixedMinor: 1,
             energyPerKwhMinor: 0,
             timePerMinuteMinor: 0,
-            taxBasisPoints: 2500
+            taxBasisPoints
           },
           sessionStarted: true
         })
       ).toEqual(expected);
     });
-        test('calculates tax from the rounded component subtotal', () => {
+
+    test('calculates tax from the rounded component subtotal', () => {
       expect(
         calculateCharge({
           energyMilliWh: 500000,
@@ -296,20 +299,6 @@ describe('energy session simulator', () => {
         taxBasisPoints: 1000
       };
 
-      expect(
-        Number.isSafeInteger(
-          energyMilliWh * tariff.energyPerKwhMinor
-        )
-      ).toBe(true);
-      expect(
-        Number.isSafeInteger(
-          activeSeconds * tariff.timePerMinuteMinor
-        )
-      ).toBe(true);
-      expect(
-        Number.isSafeInteger(5008001000000 * tariff.taxBasisPoints)
-      ).toBe(true);
-
       const breakdown = calculateCharge({
         energyMilliWh,
         activeSeconds,
@@ -324,9 +313,78 @@ describe('energy session simulator', () => {
         taxMinor: 500800100000,
         totalMinor: 5508801100000
       });
-      expect(Object.values(breakdown).every(Number.isSafeInteger)).toBe(true);
+    });
+
+    test('prices a tariff with missing rate fields as free', () => {
+      expect(
+        calculateCharge({
+          energyMilliWh: 500000,
+          activeSeconds: 120,
+          tariff: {},
+          sessionStarted: true
+        })
+      ).toEqual(NO_CHARGE);
+    });
+
+    test('clamps negative tariff rates to zero instead of crediting', () => {
+      expect(
+        calculateCharge({
+          energyMilliWh: 500000,
+          activeSeconds: 120,
+          tariff: {
+            fixedMinor: -500,
+            energyPerKwhMinor: -1200,
+            timePerMinuteMinor: -20,
+            taxBasisPoints: -1800
+          },
+          sessionStarted: true
+        })
+      ).toEqual(NO_CHARGE);
+    });
+
+    test.each([
+      ['a negative meter reading', -500000],
+      ['a non-numeric meter reading', 'plenty'],
+      ['a NaN meter reading', NaN]
+    ])('charges nothing for %s', (_label, energyMilliWh) => {
+      expect(
+        calculateCharge({
+          energyMilliWh,
+          activeSeconds: 0,
+          tariff: {
+            fixedMinor: 0,
+            energyPerKwhMinor: 1200,
+            timePerMinuteMinor: 0,
+            taxBasisPoints: 0
+          },
+          sessionStarted: true
+        })
+      ).toEqual(NO_CHARGE);
+    });
+
+    test('floors fractional seconds but rounds fractional milli-Wh', () => {
+      expect(
+        calculateCharge({
+          energyMilliWh: 1500000.6,
+          activeSeconds: 90.9,
+          tariff: {
+            fixedMinor: 0,
+            energyPerKwhMinor: 1000000,
+            timePerMinuteMinor: 60,
+            taxBasisPoints: 0
+          },
+          sessionStarted: true
+        })
+      ).toEqual({
+        fixedMinor: 0,
+        energyMinor: 1500001,
+        timeMinor: 90,
+        taxMinor: 0,
+        totalMinor: 1500091
+      });
     });
   });
+
   test('advances power and cumulative energy deterministically', () => {
     const first = simulateTick({
       elapsedSeconds: 0,
