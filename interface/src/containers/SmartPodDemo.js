@@ -37,6 +37,7 @@ import {
 const styles = theme => ({
   root: {
     minHeight: '100vh',
+    overflowX: 'hidden',
     background: 'radial-gradient(circle at 80% 0%, #263414 0, #111711 34%, #090d0c 72%)',
     color: '#f7f9f5'
   },
@@ -67,9 +68,14 @@ const styles = theme => ({
     fontWeight: 700
   },
   page: {
+    boxSizing: 'border-box',
+    width: '100%',
     maxWidth: 1180,
     margin: '0 auto',
-    padding: theme.spacing(6, 2, 8)
+    padding: theme.spacing(6, 2, 8),
+    [theme.breakpoints.down('xs')]: {
+      padding: theme.spacing(3, 1.5, 5)
+    }
   },
   hero: {
     padding: theme.spacing(3, 0, 4)
@@ -84,7 +90,14 @@ const styles = theme => ({
   heroTitle: {
     fontWeight: 800,
     maxWidth: 780,
-    lineHeight: 1.08
+    lineHeight: 1.08,
+    overflowWrap: 'anywhere',
+    [theme.breakpoints.down('sm')]: {
+      fontSize: '3rem'
+    },
+    [theme.breakpoints.down('xs')]: {
+      fontSize: '2.5rem'
+    }
   },
   heroCopy: {
     color: '#bbc5bc',
@@ -95,9 +108,20 @@ const styles = theme => ({
     display: 'flex',
     flexWrap: 'wrap',
     gap: theme.spacing(1),
-    marginTop: theme.spacing(2.5)
+    marginTop: theme.spacing(2.5),
+    '& .MuiChip-root': {
+      maxWidth: '100%',
+      height: 'auto'
+    },
+    '& .MuiChip-label': {
+      whiteSpace: 'normal',
+      overflowWrap: 'anywhere',
+      paddingTop: theme.spacing(0.75),
+      paddingBottom: theme.spacing(0.75)
+    }
   },
   panel: {
+    minWidth: 0,
     height: '100%',
     padding: theme.spacing(2),
     background: 'rgba(22, 29, 24, 0.92)',
@@ -120,7 +144,9 @@ const styles = theme => ({
   metricValue: {
     marginTop: theme.spacing(0.75),
     fontWeight: 800,
-    color: '#f8faf6'
+    color: '#f8faf6',
+    fontVariantNumeric: 'tabular-nums',
+    overflowWrap: 'anywhere'
   },
   metricDetail: {
     color: '#9ba89d',
@@ -159,15 +185,52 @@ const styles = theme => ({
     marginTop: theme.spacing(1)
   },
   textField: {
+    minWidth: 0,
     '& .MuiOutlinedInput-root': {
       background: 'rgba(255, 255, 255, 0.035)'
+    },
+    '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#ffffff',
+      borderWidth: 2
     }
   },
   actions: {
     display: 'flex',
     flexWrap: 'wrap',
     gap: theme.spacing(1),
-    marginTop: theme.spacing(2)
+    marginTop: theme.spacing(2),
+    [theme.breakpoints.down('xs')]: {
+      '& > button': {
+        width: '100%',
+        justifyContent: 'flex-start'
+      }
+    }
+  },
+  // Keyboard focus only. A bare :focus would paint the ring on mouse clicks
+  // too, which is what Mui-focusVisible exists to avoid.
+  actionButton: {
+    '&:focus-visible, &.Mui-focusVisible': {
+      outline: '3px solid #ffffff',
+      outlineOffset: 3
+    }
+  },
+  slider: {
+    '& .MuiSlider-thumb.Mui-focusVisible': {
+      boxShadow: '0 0 0 4px rgba(255, 255, 255, 0.9)'
+    }
+  },
+  networkControl: {
+    maxWidth: '100%',
+    marginLeft: 0,
+    marginRight: 0,
+    '& .MuiFormControlLabel-label': {
+      overflowWrap: 'anywhere'
+    },
+    '& .MuiSwitch-switchBase.Mui-focusVisible': {
+      outline: '3px solid #ffffff',
+      outlineOffset: 2,
+      borderRadius: '50%'
+    }
   },
   primaryAction: {
     fontWeight: 700
@@ -182,14 +245,21 @@ const styles = theme => ({
   ledgerRow: {
     display: 'flex',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    minWidth: 0,
     gap: theme.spacing(2),
     padding: theme.spacing(1.1, 0),
-    color: '#c7d0c8'
+    color: '#c7d0c8',
+    overflowWrap: 'anywhere'
   },
   ledgerValue: {
+    minWidth: 0,
+    maxWidth: '60%',
     color: '#f8faf6',
     fontWeight: 600,
-    textAlign: 'right'
+    fontVariantNumeric: 'tabular-nums',
+    textAlign: 'right',
+    overflowWrap: 'anywhere'
   },
   total: {
     color: '#a4d64a',
@@ -419,7 +489,8 @@ class SmartPodDemo extends Component {
             <Typography variant="h6" className={classes.heroCopy}>
               Explore SmartPod's proposed hardware-neutral session model. Start a simulated port, tune its current and tariff, disconnect the network, or inject a safety fault.
             </Typography>
-            <div className={classes.statusRow}>
+            {/* role="status" already implies polite, atomic announcements. */}
+            <div className={classes.statusRow} role="status">
               <Chip color={fault ? 'secondary' : 'primary'} label={statusLabels[sessionState]} icon={fault ? <WarningIcon /> : <EvStationIcon />} />
               <Chip variant="outlined" label={networkOnline ? 'Gateway online' : 'Offline ledger active'} icon={!networkOnline ? <CloudOffIcon /> : undefined} />
               <Chip variant="outlined" label={active ? 'Contactor feedback: closed' : 'Contactor feedback: open'} />
@@ -429,10 +500,10 @@ class SmartPodDemo extends Component {
           </section>
 
           <Grid container spacing={2}>
-            <Grid item xs={6} md={3}>{this.renderMetric('Live power', `${(powerW / 1000).toFixed(2)} kW`, `${currentA.toFixed(2)} A at ${voltageV} V`)}</Grid>
-            <Grid item xs={6} md={3}>{this.renderMetric('Session energy', `${(energyWh / 1000).toFixed(3)} kWh`, 'Monotonic simulated meter')}</Grid>
-            <Grid item xs={6} md={3}>{this.renderMetric('Running charge', money(charge.totalMinor, activeTariff.currency), sessionStarted ? 'Estimated until settlement' : 'Starts with authorization')}</Grid>
-            <Grid item xs={6} md={3}>{this.renderMetric('Elapsed', formatDuration(elapsedSeconds), networkOnline ? 'Synchronized' : 'Continuing offline')}</Grid>
+            <Grid item xs={12} sm={6} md={3}>{this.renderMetric('Live power', `${(powerW / 1000).toFixed(2)} kW`, `${currentA.toFixed(2)} A at ${voltageV} V`)}</Grid>
+            <Grid item xs={12} sm={6} md={3}>{this.renderMetric('Session energy', `${(energyWh / 1000).toFixed(3)} kWh`, 'Monotonic simulated meter')}</Grid>
+            <Grid item xs={12} sm={6} md={3}>{this.renderMetric('Running charge', money(charge.totalMinor, activeTariff.currency), sessionStarted ? 'Estimated until settlement' : 'Starts with authorization')}</Grid>
+            <Grid item xs={12} sm={6} md={3}>{this.renderMetric('Elapsed', formatDuration(elapsedSeconds), networkOnline ? 'Synchronized' : 'Continuing offline')}</Grid>
 
             <Grid item xs={12} md={8}>
               <Paper className={classes.panel} elevation={0}>
@@ -446,6 +517,8 @@ class SmartPodDemo extends Component {
                     <Typography color="primary"><strong>{currentLimitA} A</strong></Typography>
                   </div>
                   <Slider
+                    className={classes.slider}
+                    getAriaValueText={value => `${value} amperes`}
                     value={currentLimitA}
                     min={6}
                     max={32}
@@ -460,6 +533,7 @@ class SmartPodDemo extends Component {
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <TextField
+                      id="nominal-voltage"
                       className={classes.textField}
                       label="Nominal voltage"
                       type="number"
@@ -473,7 +547,14 @@ class SmartPodDemo extends Component {
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <FormControlLabel
-                      control={<Switch checked={networkOnline} onChange={event => this.setState({ networkOnline: event.target.checked })} color="primary" />}
+                      className={classes.networkControl}
+                      control={(
+                        <Switch
+                          checked={networkOnline}
+                          onChange={event => this.setState({ networkOnline: event.target.checked })}
+                          color="primary"
+                        />
+                      )}
                       label={networkOnline ? 'Cloud connection available' : 'Simulate network outage'}
                     />
                     {!networkOnline && (
@@ -485,10 +566,46 @@ class SmartPodDemo extends Component {
                 </Grid>
 
                 <div className={classes.actions}>
-                  <Button className={classes.primaryAction} variant="contained" color="primary" startIcon={<PlayArrowIcon />} onClick={this.startSession} disabled={!canStart}>Start session</Button>
-                  <Button variant="contained" color="secondary" startIcon={<StopIcon />} onClick={this.stopSession} disabled={!active}>Stop safely</Button>
-                  <Button className={classes.faultAction} variant="outlined" startIcon={<WarningIcon />} onClick={this.simulateFault} disabled={!canFault}>Inject thermal fault</Button>
-                  <Button variant="text" startIcon={<RefreshIcon />} onClick={this.resetSimulator}>Reset</Button>
+                  <Button
+                    className={`${classes.primaryAction} ${classes.actionButton}`}
+                    variant="contained"
+                    color="primary"
+                    startIcon={<PlayArrowIcon />}
+                    onClick={this.startSession}
+                    disabled={!canStart}
+                  >
+                    Start session
+                  </Button>
+
+                  <Button
+                    className={classes.actionButton}
+                    variant="contained"
+                    color="secondary"
+                    startIcon={<StopIcon />}
+                    onClick={this.stopSession}
+                    disabled={!active}
+                  >
+                    Stop safely
+                  </Button>
+
+                  <Button
+                    className={`${classes.faultAction} ${classes.actionButton}`}
+                    variant="outlined"
+                    startIcon={<WarningIcon />}
+                    onClick={this.simulateFault}
+                    disabled={!canFault}
+                  >
+                    Inject thermal fault
+                  </Button>
+
+                  <Button
+                    className={classes.actionButton}
+                    variant="text"
+                    startIcon={<RefreshIcon />}
+                    onClick={this.resetSimulator}
+                  >
+                    Reset
+                  </Button>
                 </div>
               </Paper>
             </Grid>
@@ -499,17 +616,71 @@ class SmartPodDemo extends Component {
                 <Typography variant="body2" className={classes.sectionCopy}>These fields configure the next session. Active and completed totals keep their original snapshot.</Typography>
 
                 <Grid container spacing={2} className={classes.tariffGrid}>
-                  <Grid item xs={6}>
-                    <TextField className={classes.textField} label="Energy ₹/kWh" type="number" variant="outlined" fullWidth value={(draftTariff.energyPerKwhMinor / 100).toFixed(2)} onChange={this.updateTariff('energyPerKwhMinor')} disabled={tariffLocked} inputProps={{ min: 0, step: 0.5 }} />
+                  {/* id wires MUI's label to the input; without it v4 leaves
+                      htmlFor undefined and the field has no accessible name. */}
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      id="tariff-energy-per-kwh"
+                      className={classes.textField}
+                      label="Energy ₹/kWh"
+                      type="number"
+                      variant="outlined"
+                      fullWidth
+                      value={(draftTariff.energyPerKwhMinor / 100).toFixed(2)}
+                      onChange={this.updateTariff('energyPerKwhMinor')}
+                      disabled={tariffLocked}
+                      inputProps={{ min: 0, step: 0.5 }}
+                    />
                   </Grid>
-                  <Grid item xs={6}>
-                    <TextField className={classes.textField} label="Session fee ₹" type="number" variant="outlined" fullWidth value={(draftTariff.fixedMinor / 100).toFixed(2)} onChange={this.updateTariff('fixedMinor')} disabled={tariffLocked} inputProps={{ min: 0, step: 1 }} />
+
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      id="tariff-session-fee"
+                      className={classes.textField}
+                      label="Session fee ₹"
+                      type="number"
+                      variant="outlined"
+                      fullWidth
+                      value={(draftTariff.fixedMinor / 100).toFixed(2)}
+                      onChange={this.updateTariff('fixedMinor')}
+                      disabled={tariffLocked}
+                      inputProps={{ min: 0, step: 1 }}
+                    />
                   </Grid>
-                  <Grid item xs={6}>
-                    <TextField className={classes.textField} label="Time ₹/min" type="number" variant="outlined" fullWidth value={(draftTariff.timePerMinuteMinor / 100).toFixed(2)} onChange={this.updateTariff('timePerMinuteMinor')} disabled={tariffLocked} inputProps={{ min: 0, step: 0.1 }} />
+
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      id="tariff-time-per-minute"
+                      className={classes.textField}
+                      label="Time ₹/min"
+                      type="number"
+                      variant="outlined"
+                      fullWidth
+                      value={(draftTariff.timePerMinuteMinor / 100).toFixed(2)}
+                      onChange={this.updateTariff('timePerMinuteMinor')}
+                      disabled={tariffLocked}
+                      inputProps={{ min: 0, step: 0.1 }}
+                    />
                   </Grid>
-                  <Grid item xs={6}>
-                    <TextField className={classes.textField} label="Tax %" type="number" variant="outlined" fullWidth value={(draftTariff.taxBasisPoints / 100).toFixed(2)} onChange={event => this.setState(previous => ({ draftTariff: { ...previous.draftTariff, taxBasisPoints: Math.max(0, Math.round((Number(event.target.value) || 0) * 100)) } }))} disabled={tariffLocked} inputProps={{ min: 0, step: 1 }} />
+
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      id="tariff-tax-percent"
+                      className={classes.textField}
+                      label="Tax %"
+                      type="number"
+                      variant="outlined"
+                      fullWidth
+                      value={(draftTariff.taxBasisPoints / 100).toFixed(2)}
+                      onChange={event => this.setState(previous => ({
+                        draftTariff: {
+                          ...previous.draftTariff,
+                          taxBasisPoints: Math.max(0, Math.round((Number(event.target.value) || 0) * 100))
+                        }
+                      }))}
+                      disabled={tariffLocked}
+                      inputProps={{ min: 0, step: 1 }}
+                    />
                   </Grid>
                 </Grid>
 
