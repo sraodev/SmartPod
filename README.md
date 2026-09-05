@@ -174,6 +174,8 @@ cd ..
 ```
 
 The build copies the compressed interface into `data/www` for the device filesystem image.
+See [frontend build targets](docs/frontend-build.md) for the Vite environment,
+hosted simulator build, compression contract, and staged migration boundary.
 
 ### 3. Build the firmware
 

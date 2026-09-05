@@ -2,6 +2,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router-dom';
+import { vi } from 'vitest';
 
 import SmartPodDemo from './SmartPodDemo';
 
@@ -51,7 +52,7 @@ describe('SmartPodDemo', () => {
   let container;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     container = document.createElement('div');
     document.body.appendChild(container);
     act(() => {
@@ -69,7 +70,7 @@ describe('SmartPodDemo', () => {
       unmountComponentAtNode(container);
     });
     container.remove();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('renders public controls and the real-billing disclosure', () => {
@@ -123,7 +124,7 @@ describe('SmartPodDemo', () => {
 
     act(() => {
       start.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      jest.advanceTimersByTime(AFTER_START_TRANSITION_MS);
+      vi.advanceTimersByTime(AFTER_START_TRANSITION_MS);
     });
 
     expect(status.textContent).toContain('Contactor feedback: closed');
@@ -134,7 +135,7 @@ describe('SmartPodDemo', () => {
   test('starts, advances, and safely completes a simulated session', () => {
     act(() => {
       findButton(container, 'Start session').dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      jest.advanceTimersByTime(1700);
+      vi.advanceTimersByTime(1700);
     });
 
     expect(container.textContent).toContain('Delivering energy');
@@ -142,7 +143,7 @@ describe('SmartPodDemo', () => {
 
     act(() => {
       findButton(container, 'Stop safely').dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
     });
 
     expect(container.textContent).toContain('Session complete');
@@ -154,7 +155,7 @@ describe('SmartPodDemo', () => {
       findButton(container, 'Start session').dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
     act(() => {
-      jest.advanceTimersByTime(700);
+      vi.advanceTimersByTime(700);
     });
     act(() => {
       findButton(container, 'Inject thermal fault').dispatchEvent(new MouseEvent('click', { bubbles: true }));

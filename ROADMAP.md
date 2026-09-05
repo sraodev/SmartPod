@@ -11,7 +11,11 @@ Implementation tasks, dependencies, milestone links, and contributor ownership a
 - [x] Fix the unbounded JSON parse and uninitialized service pointers found during review.
 - [ ] Replace public default credentials and secrets with first-boot provisioning.
 - [ ] Add token expiry, revocation, and a maintained embedded networking stack.
-- [ ] Replace the deprecated Create React App/Material UI v4 build stack with the v2 Vite PWA.
+- [ ] Replace the deprecated Create React App/Material UI v4 build stack with the v2 Vite PWA (in progress).
+  - [x] Migrate the build and test runners to Vite and Vitest without changing UI behavior.
+  - [ ] Migrate React and Material UI in a focused compatibility stage.
+  - [ ] Restore a lint gate to replace the one Create React App provided.
+  - [ ] Add explicitly designed and tested service-worker behavior.
 
 ## 1. Contract-first simulator
 

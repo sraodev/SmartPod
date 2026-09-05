@@ -35,7 +35,7 @@ Follow the [README quick start](README.md#quick-start) first. The GitHub Actions
 # Dashboard
 cd interface
 npm ci
-npm test -- --watchAll=false
+npm test
 npm run build
 npm run build:demo
 
