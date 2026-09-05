@@ -23,7 +23,7 @@ void APSettingsService::loop()
 void APSettingsService::manageAP()
 {
   WiFiMode_t currentWiFiMode = WiFi.getMode();
-  if (_provisionMode == AP_MODE_ALWAYS || (_provisionMode == AP_MODE_DISCONNECTED && WiFi.status() != WL_CONNECTED))
+  if (!_securityManager->isProvisioned() || _provisionMode == AP_MODE_ALWAYS || (_provisionMode == AP_MODE_DISCONNECTED && WiFi.status() != WL_CONNECTED))
   {
     if (currentWiFiMode == WIFI_OFF || currentWiFiMode == WIFI_STA)
     {
@@ -42,7 +42,16 @@ void APSettingsService::manageAP()
 void APSettingsService::startAP()
 {
   smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "ap", "starting access point");
-  WiFi.softAP(_ssid.c_str(), _password.c_str());
+  if (_securityManager->isProvisioned()) {
+    WiFi.softAP(_ssid.c_str(), _password.c_str());
+  } else {
+#if defined(ESP8266)
+    const String provisioningSsid = String("SmartPod-Setup-") + String(ESP.getChipId(), HEX);
+#else
+    const String provisioningSsid = "SmartPod-Setup";
+#endif
+    WiFi.softAP(provisioningSsid.c_str());
+  }
   if (!_dnsServer)
   {
     IPAddress apIp = WiFi.softAPIP();
@@ -86,10 +95,12 @@ void APSettingsService::readFromJsonObject(JsonObject &root)
     _provisionMode = AP_MODE_ALWAYS;
   }
   _ssid = root["ssid"] | AP_DEFAULT_SSID;
-  _password = root["password"] | AP_DEFAULT_PASSWORD;
-  if (_password.length() < 8 || _password.length() > 63)
+  _password = root["password"] | "";
+  if (_securityManager->isProvisioned() && _provisionMode != AP_MODE_NEVER &&
+      (_password.length() < 8 || _password.length() > 63))
   {
-    _password = AP_DEFAULT_PASSWORD;
+    _provisionMode = AP_MODE_NEVER;
+    _password = "";
   }
 }
 
@@ -98,6 +109,22 @@ void APSettingsService::writeToJsonObject(JsonObject &root)
   root["provision_mode"] = _provisionMode;
   root["ssid"] = _ssid;
   root["password"] = _password;
+}
+
+void APSettingsService::readFromUpdateJsonObject(JsonObject &root)
+{
+  const String previousPassword = _password;
+  readFromJsonObject(root);
+  const String requestedPassword = root["password"] | "";
+  if (requestedPassword.length() == 0) _password = previousPassword;
+}
+
+void APSettingsService::writeToResponseJsonObject(JsonObject &root)
+{
+  root["provision_mode"] = _provisionMode;
+  root["ssid"] = _ssid;
+  root["password"] = "";
+  root["password_set"] = _password.length() > 0;
 }
 
 void APSettingsService::onConfigUpdated()

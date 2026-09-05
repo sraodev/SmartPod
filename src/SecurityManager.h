@@ -5,7 +5,7 @@
 #include <ArduinoJsonJWT.h>
 #include <ESPAsyncWebServer.h>
 
-#define DEFAULT_JWT_SECRET "esp8266-react"
+#define LEGACY_DEFAULT_JWT_SECRET "esp8266-react"
 
 #define AUTHORIZATION_HEADER "Authorization"
 #define AUTHORIZATION_HEADER_PREFIX "Bearer "
@@ -81,6 +81,10 @@ class SecurityManager {
     */
     String generateJWT(User *user);
 
+    bool isProvisioned() const {
+      return _provisioned;
+    }
+
     /**
      * Wrap the provided request to provide validation against an AuthenticationPredicate.
      */
@@ -88,8 +92,9 @@ class SecurityManager {
 
   protected:
 
-    ArduinoJsonJWT _jwtHandler = ArduinoJsonJWT(DEFAULT_JWT_SECRET);
+    ArduinoJsonJWT _jwtHandler = ArduinoJsonJWT("");
     std::list<User> _users;
+    bool _provisioned = false;
 
   private:
 

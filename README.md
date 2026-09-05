@@ -192,18 +192,11 @@ platformio run --target uploadfs
 
 If detection fails, append `--upload-port <your-port>` to either command instead of committing a machine-specific port.
 
-On first boot, the checked-in filesystem image uses these demo defaults:
-
-| Setting | Value |
-| --- | --- |
-| Access-point SSID | `SmartPod` |
-| Access-point password | `smartpod` |
-| Admin login | `admin` / `admin` |
-| Guest login | `guest` / `guest` |
-| OTA password | `smartpod` |
-
-> [!IMPORTANT]
-> Replace the access-point password, OTA password, JWT secret, and users in `data/config` before uploading the filesystem. The defaults are public and provide no deployment security.
+On first boot, the checked-in filesystem contains no shared administrator,
+JWT, Wi-Fi, access-point, or OTA password. Complete the documented
+[one-time local provisioning flow](docs/first-boot-provisioning.md) before
+normal administration. The temporary setup access point is intentionally open,
+so provision only while physically near the device and never in a public place.
 
 ## Local interface development
 

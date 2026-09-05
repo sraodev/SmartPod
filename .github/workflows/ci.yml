@@ -97,6 +97,9 @@ jobs:
       - name: Test structured firmware logging
         run: python -m unittest discover -s tests -p 'test_logging.py' -v
 
+      - name: Test first-boot provisioning policy
+        run: python -m unittest discover -s tests -p 'test_provisioning.py' -v
+
       - name: Test preview packaging and tamper rejection
         run: python -m unittest discover -s tests -p 'test_release.py' -v
 
