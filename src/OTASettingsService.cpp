@@ -24,7 +24,7 @@ void OTASettingsService::onConfigUpdated() {
 void OTASettingsService::readFromJsonObject(JsonObject& root) {
   _enabled = root["enabled"];
   _port = root["port"];
-  _password = root["password"] | DEFAULT_OTA_PASSWORD;
+  _password = root["password"] | "";
 
   // provide defaults
   if (_port < 0){
@@ -38,6 +38,20 @@ void OTASettingsService::writeToJsonObject(JsonObject& root) {
   root["password"] = _password;
 }
 
+void OTASettingsService::readFromUpdateJsonObject(JsonObject& root) {
+  const String previousPassword = _password;
+  readFromJsonObject(root);
+  const String requestedPassword = root["password"] | "";
+  if (requestedPassword.length() == 0) _password = previousPassword;
+}
+
+void OTASettingsService::writeToResponseJsonObject(JsonObject& root) {
+  root["enabled"] = _enabled;
+  root["port"] = _port;
+  root["password"] = "";
+  root["password_set"] = _password.length() > 0;
+}
+
 void OTASettingsService::configureArduinoOTA() {
   if (_arduinoOTA){
 #if defined(ESP_PLATFORM)
@@ -46,7 +60,7 @@ void OTASettingsService::configureArduinoOTA() {
     delete _arduinoOTA;
     _arduinoOTA = nullptr;
   }
-  if (_enabled) {
+  if (_enabled && _password.length() >= 8 && _password.length() <= 64) {
     smartpod_logging::logger().write(smartpod_logging::LogLevel::Info, "ota", "starting update service");
     _arduinoOTA = new ArduinoOTAClass;
     _arduinoOTA->setPort(_port);

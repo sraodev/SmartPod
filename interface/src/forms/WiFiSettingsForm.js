@@ -112,10 +112,10 @@ class WiFiSettingsForm extends React.Component {
                 {
                   !isNetworkOpen(selectedNetwork) &&
                   <PasswordValidator
-                    validators={['required', 'matchRegexp:^.{1,64}$']}
-                    errorMessages={['Password is required for a protected network', 'Password must be 64 characters or less']}
+                    validators={wifiSettings.password_set ? ['matchRegexp:^.{0,64}$'] : ['required', 'matchRegexp:^.{1,64}$']}
+                    errorMessages={wifiSettings.password_set ? ['Password must be 64 characters or less'] : ['Password is required for a protected network', 'Password must be 64 characters or less']}
                     name="password"
-                    label="Password"
+                    label={wifiSettings.password_set ? 'New password (leave blank to keep current)' : 'Password'}
                     className={classes.textField}
                     value={wifiSettings.password}
                     onChange={handleValueChange('password')}

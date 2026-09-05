@@ -54,6 +54,11 @@ node scripts/test-gateway-contract.cjs
 
 If hardware is required, include the board, sensor variant, wiring conditions, and reference equipment in your test notes. Never include Wi-Fi passwords, tokens, private IPs, or other secrets in logs or screenshots.
 
+First-boot and credential changes must preserve the guarantees in
+[the provisioning guide](docs/first-boot-provisioning.md): fail closed, never
+return or log stored secrets, and distinguish software tests from physical
+ESP8266 evidence.
+
 ## Pull requests
 
 A useful pull request explains:
