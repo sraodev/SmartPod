@@ -35,7 +35,7 @@ jobs:
 
       - name: Test dashboard
         working-directory: interface
-        run: npm test -- --watchAll=false
+        run: npm test
         env:
           CI: "true"
 
@@ -70,14 +70,25 @@ jobs:
           CI: "true"
 
       - name: Verify compressed dashboard bundle
-        run: test -n "$(find data/www/js -type f -name '*.js.gz' -print -quit)"
+        run: |
+          test -n "$(find data/www/js -type f -name '*.js.gz' -print -quit)"
+          test -z "$(find data/www/js -type f -name '*.js' -print -quit)"
+          gzip -t data/www/js/*.js.gz
+          grep -q 'src="/js/' data/www/index.html
+          test -f data/www/app/manifest.json
+          du -sh data/www
 
       - name: Build hosted simulator
         working-directory: interface
         env:
           PUBLIC_URL: /SmartPod
           REACT_APP_DEMO_MODE: "true"
-        run: npm run build:demo
+        run: |
+          npm run build:demo
+          grep -q '/SmartPod/assets/' build/index.html
+          grep -q 'Real billing requires a certified meter' build/assets/*.js
+          test -f build/app/manifest.json
+          du -sh build
 
       - name: Reject critical npm advisories
         working-directory: interface
