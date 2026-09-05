@@ -14,6 +14,7 @@ Implementation tasks, dependencies, milestone links, and contributor ownership a
 - [ ] Replace the deprecated Create React App/Material UI v4 build stack with the v2 Vite PWA (in progress).
   - [x] Migrate the build and test runners to Vite and Vitest without changing UI behavior.
   - [ ] Migrate React and Material UI in a focused compatibility stage.
+  - [ ] Restore a lint gate to replace the one Create React App provided.
   - [ ] Add explicitly designed and tested service-worker behavior.
 
 ## 1. Contract-first simulator

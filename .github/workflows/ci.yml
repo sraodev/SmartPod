@@ -76,6 +76,10 @@ jobs:
           gzip -t data/www/js/*.js.gz
           grep -q 'src="/js/' data/www/index.html
           test -f data/www/app/manifest.json
+          test -f data/www/css/roboto.css
+          test -f data/www/fonts/ro-re.w2
+          # SPIFFS object names are limited to 32 bytes including the path.
+          test -z "$(find data/www -type f | sed 's|^data/www|/www|' | awk 'length($0) > 31')"
           du -sh data/www
 
       - name: Build hosted simulator
@@ -87,7 +91,15 @@ jobs:
           npm run build:demo
           grep -q '/SmartPod/assets/' build/index.html
           grep -q 'Real billing requires a certified meter' build/assets/*.js
+          grep -q '/SmartPod/app/icon.png' build/assets/*.js
+          # Present only when REACT_APP_DEMO_MODE is unset. `set -e` ignores a
+          # `!`-inverted status, so the failure has to be raised explicitly.
+          if grep -q 'Device sign in' build/assets/*.js; then
+            echo "hosted build shipped the device sign-in shell"
+            exit 1
+          fi
           test -f build/app/manifest.json
+          test -f build/css/roboto.css
           du -sh build
 
       - name: Reject critical npm advisories

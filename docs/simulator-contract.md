@@ -89,6 +89,6 @@ The required CI build validates the OpenAPI structure and schema examples with
 [Redocly lint](https://redocly.com/docs/cli/commands/lint); invalid examples are errors.
 
 ```sh
-CI=true npm --prefix interface test -- --watchAll=false
+CI=true npm --prefix interface test
 npx --yes @redocly/cli@2.49.0 lint docs/openapi-v2.yaml
 ```
