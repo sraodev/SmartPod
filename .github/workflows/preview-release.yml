@@ -51,7 +51,7 @@ jobs:
           PLATFORMIO_SETTING_ENABLE_TELEMETRY: "no"
         run: |
           npm --prefix interface ci
-          npm --prefix interface test -- --watchAll=false
+          npm --prefix interface test
           npm --prefix interface run build
           python -m pip install platformio==6.1.19
           python -m unittest discover -s tests -p 'test_*.py' -v
