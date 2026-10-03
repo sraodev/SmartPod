@@ -14,8 +14,6 @@
 #define DNS_PORT 53
 
 #define AP_DEFAULT_SSID "ssid"
-#define AP_DEFAULT_PASSWORD "password"
-
 #define AP_SETTINGS_FILE "/config/apSettings.json"
 #define AP_SETTINGS_SERVICE_PATH "/rest/apSettings"
 
@@ -32,6 +30,8 @@ class APSettingsService : public AdminSettingsService {
 
     void readFromJsonObject(JsonObject& root);
     void writeToJsonObject(JsonObject& root);
+    void readFromUpdateJsonObject(JsonObject& root);
+    void writeToResponseJsonObject(JsonObject& root);
     void onConfigUpdated();
 
   private:

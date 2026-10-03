@@ -8,7 +8,6 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 
-import PasswordValidator from '../components/PasswordValidator';
 import { withAuthenticationContext } from '../authentication/Context';
 
 const styles = theme => ({
@@ -18,9 +17,6 @@ const styles = theme => ({
   loadingSettingsDetails: {
     margin: theme.spacing(4),
     textAlign: "center"
-  },
-  textField: {
-    width: "100%"
   },
   button: {
     marginRight: theme.spacing(2),
@@ -36,7 +32,7 @@ class SecuritySettingsForm extends React.Component {
   }
 
   render() {
-    const { classes, securitySettingsFetched, securitySettings, errorMessage, handleValueChange, onReset } = this.props;
+    const { classes, securitySettingsFetched, securitySettings, errorMessage, onReset } = this.props;
     return (
       !securitySettingsFetched ?
         <div className={classes.loadingSettings}>
@@ -48,23 +44,13 @@ class SecuritySettingsForm extends React.Component {
         :
         securitySettings ?
           <ValidatorForm onSubmit={this.onSubmit} ref="SecuritySettingsForm">
-            <PasswordValidator
-              validators={['required', 'matchRegexp:^.{1,64}$']}
-              errorMessages={['JWT Secret Required', 'JWT Secret must be 64 characters or less']}
-              name="jwt_secret"
-              label="JWT Secret"
-              className={classes.textField}
-              value={securitySettings.jwt_secret}
-              onChange={handleValueChange('jwt_secret')}
-              margin="normal"
-            />
             <Typography component="div" variant="body1">
               <Box bgcolor="primary.main" color="primary.contrastText" p={2} mt={2} mb={2}>
-                If you modify the JWT Secret, all users will be logged out.
+                Rotate the device signing secret. All users will be logged out.
               </Box>
             </Typography>
             <Button variant="contained" color="primary" className={classes.button} type="submit">
-              Save
+              Rotate signing secret
             </Button>
             <Button variant="contained" color="secondary" className={classes.button} onClick={onReset}>
               Reset
@@ -90,7 +76,6 @@ SecuritySettingsForm.propTypes = {
   errorMessage: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
   onReset: PropTypes.func.isRequired,
-  handleValueChange: PropTypes.func.isRequired,
   authenticationContext: PropTypes.object.isRequired,
 };
 

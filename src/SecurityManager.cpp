@@ -13,6 +13,9 @@ Authentication SecurityManager::authenticateRequest(AsyncWebServerRequest *reque
 }
 
 Authentication SecurityManager::authenticateJWT(String jwt) {
+  if (!_provisioned) {
+    return Authentication();
+  }
   DynamicJsonDocument payloadDocument(MAX_JWT_SIZE);
   _jwtHandler.parseJWT(jwt, payloadDocument);
   if (payloadDocument.is<JsonObject>()) {
@@ -28,6 +31,9 @@ Authentication SecurityManager::authenticateJWT(String jwt) {
 }
 
 Authentication SecurityManager::authenticate(String username, String password) {
+  if (!_provisioned) {
+    return Authentication();
+  }
   for (User _user : _users) {
     if (_user.getUsername() == username && _user.getPassword() == password){
       return Authentication(_user);
@@ -64,5 +70,4 @@ ArRequestHandlerFunction SecurityManager::wrapRequest(ArRequestHandlerFunction o
     }
     onRequest(request);
   };
-}    
-    
+}

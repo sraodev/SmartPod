@@ -14,8 +14,6 @@
 
 // Emergency defaults
 #define DEFAULT_OTA_PORT 8266
-#define DEFAULT_OTA_PASSWORD "esp-react"
-
 #define OTA_SETTINGS_FILE "/config/otaSettings.json"
 #define OTA_SETTINGS_SERVICE_PATH "/rest/otaSettings"
 
@@ -33,6 +31,8 @@ class OTASettingsService : public AdminSettingsService {
       void onConfigUpdated();
       void readFromJsonObject(JsonObject& root);
       void writeToJsonObject(JsonObject& root);
+      void readFromUpdateJsonObject(JsonObject& root);
+      void writeToResponseJsonObject(JsonObject& root);
 
   private:
 

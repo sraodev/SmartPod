@@ -75,10 +75,10 @@ class APSettingsForm extends React.Component {
                 margin="normal"
               />
               <PasswordValidator
-                    validators={['required', 'matchRegexp:^.{8,63}$']}
-                    errorMessages={['Access Point Password is required', 'Access Point Password must be 8-63 characters']}
+                    validators={apSettings.password_set ? ['matchRegexp:^(?:$|.{8,63})$'] : ['required', 'matchRegexp:^.{8,63}$']}
+                    errorMessages={apSettings.password_set ? ['New access point password must be 8-63 characters'] : ['Access Point Password is required', 'Access Point Password must be 8-63 characters']}
                     name="password"
-                    label="Access Point Password"
+                    label={apSettings.password_set ? 'New access point password (leave blank to keep current)' : 'Access Point Password'}
                     className={classes.textField}
                     value={apSettings.password}
                     onChange={handleValueChange('password')}

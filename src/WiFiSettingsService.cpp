@@ -58,6 +58,19 @@ void WiFiSettingsService::writeToJsonObject(JsonObject& root){
       writeIP(root, "dns_ip_2", _dnsIP2);
 }
 
+void WiFiSettingsService::readFromUpdateJsonObject(JsonObject& root){
+    const String previousPassword = _password;
+    readFromJsonObject(root);
+    const String requestedPassword = root["password"] | "";
+    if (requestedPassword.length() == 0) _password = previousPassword;
+}
+
+void WiFiSettingsService::writeToResponseJsonObject(JsonObject& root){
+    writeToJsonObject(root);
+    root["password"] = "";
+    root["password_set"] = _password.length() > 0;
+}
+
 void WiFiSettingsService::onConfigUpdated() {
   reconfigureWiFiConnection();
 }

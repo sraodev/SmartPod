@@ -55,7 +55,7 @@ protected:
     // handle the request
     AsyncJsonResponse * response = new AsyncJsonResponse(MAX_SETTINGS_SIZE);
     JsonObject jsonObject = response->getRoot();  
-    writeToJsonObject(jsonObject);
+    writeToResponseJsonObject(jsonObject);
     response->setLength();
     request->send(response);
   }
@@ -64,7 +64,7 @@ protected:
     // handle the request
     if (jsonDocument.is<JsonObject>()){
       JsonObject newConfig = jsonDocument.as<JsonObject>();
-      readFromJsonObject(newConfig);
+      readFromUpdateJsonObject(newConfig);
       if (!writeToFS()) {
         smartpod_logging::logger().write(smartpod_logging::LogLevel::Error, "settings", "persistence failed");
         request->send(500);
@@ -74,7 +74,7 @@ protected:
       // write settings back with a callback to reconfigure the wifi
       AsyncJsonCallbackResponse * response = new AsyncJsonCallbackResponse([this] () {onConfigUpdated();}, MAX_SETTINGS_SIZE);
       JsonObject jsonObject = response->getRoot();   
-      writeToJsonObject(jsonObject);
+      writeToResponseJsonObject(jsonObject);
       response->setLength();
       request->send(response);
     } else {
@@ -84,6 +84,14 @@ protected:
 
   // implement to perform action when config has been updated
   virtual void onConfigUpdated(){}
+
+  virtual void readFromUpdateJsonObject(JsonObject& root) {
+    readFromJsonObject(root);
+  }
+
+  virtual void writeToResponseJsonObject(JsonObject& root) {
+    writeToJsonObject(root);
+  }
 
 };
 

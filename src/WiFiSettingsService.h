@@ -22,6 +22,8 @@ class WiFiSettingsService : public AdminSettingsService {
 
     void readFromJsonObject(JsonObject& root);
     void writeToJsonObject(JsonObject& root);
+    void readFromUpdateJsonObject(JsonObject& root);
+    void writeToResponseJsonObject(JsonObject& root);
     void onConfigUpdated();
 
   private:

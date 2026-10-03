@@ -58,10 +58,10 @@ class UserForm extends React.Component {
               margin="normal"
             />
             <PasswordValidator
-              validators={['required', 'matchRegexp:^.{1,64}$']}
-              errorMessages={['Password is required', 'Password must be 64 characters or less']}
+              validators={creating ? ['required', 'matchRegexp:^.{8,64}$'] : ['matchRegexp:^(?:$|.{8,64})$']}
+              errorMessages={creating ? ['Password is required', 'Password must be 8-64 characters'] : ['New password must be 8-64 characters']}
               name="password"
-              label="Password"
+              label={creating ? 'Password' : 'New password (leave blank to keep current)'}
               className={classes.textField}
               value={user.password}
               onChange={handleValueChange('password')}
