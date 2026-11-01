@@ -73,7 +73,7 @@ jobs:
           path: dist-release/*
           if-no-files-found: error
           retention-days: 14
-      - uses: actions/download-artifact@v8.0.1
+      - uses: actions/download-artifact@v8.0.2
         with:
           name: preview-package
           path: release-verified
@@ -97,7 +97,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/download-artifact@v8.0.1
+      - uses: actions/download-artifact@v8.0.2
         with:
           name: preview-package
           path: dist-release
